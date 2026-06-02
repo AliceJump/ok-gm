@@ -4,7 +4,7 @@ from qfluentwidgets import BodyLabel, FluentIcon, PushButton, PrimaryPushButton
 
 from ok import Config
 from ok.gui.widget.CustomTab import CustomTab
-from src.tasks.MyOneTimeTask import MyOneTimeTask
+from src.tasks.DailyTask import MyOneTimeTask
 
 
 class MyTab(CustomTab):

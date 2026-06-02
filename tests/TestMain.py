@@ -12,7 +12,7 @@ from ok.gui.tasks.ModifyListDialog import ModifyListDialog
 from ok.gui.tasks.ModifyListItem import ModifyListItem
 from qfluentwidgets import PushButton
 
-from src.tasks.MyOneTimeTask import MyOneTimeTask
+from src.tasks.DailyTask import MyOneTimeTask
 
 
 class TestMyOneTimeTask(TaskTestCase):
