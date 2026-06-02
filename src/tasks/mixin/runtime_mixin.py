@@ -312,9 +312,9 @@ class RuntimeMixin:
         #     return False
 
         if esc:
-            self.back(after_sleep=1.5)
+            # self.back(after_sleep=1.5)
+            self.wait_click_feature(feature=[fL.process_back_home, fL.back, fL.hall_back_home], time_out=2, raise_if_not_found=False, click_after_delay=0.5)
 
-        return False
 
     def in_main(self):
         """

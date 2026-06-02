@@ -12,4 +12,5 @@ class TestTask(DailyArena, BaseGMTask):
         self.icon = FluentIcon.UP
     def run(self):
         self.ensure_main()
+        self.wait_click_feature
     

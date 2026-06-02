@@ -23,15 +23,16 @@ class DailyArena:
     def enter_arena(self):
         self.log_info("开始打小偶像竞技场...")
         if not self.wait_click_feature(feature=fL.switch_arena_page, raise_if_not_found=False, click_after_delay=0.5):
-            self.mark_task_failure("找不到竞技场的门")
+            self.mark_task_failure("找不到切换到竞技场的按钮")
             return False
         if not self.wait_click_feature(feature=fL.arena_enter, raise_if_not_found=False, click_after_delay=0.5):
-            self.mark_task_failure("找不到开始战斗的按钮")
+            self.mark_task_failure("找不到进入竞技场的按钮")
             return False
         self.log_info("开干了!")
         return True
     def check_arena_pop_up(self):
-        if self.wait_click_feature(feature=fL.arena_checkout, raise_if_not_found=False, click_after_delay=0.5):
+        if self.wait_click_feature(feature=fL.arena_checkout, settle_time=1, raise_if_not_found=False, click_after_delay=0.5):
+            self.log_info("竞技场结算界面弹出来了，可能是上次竞技场结算")
             if result:= self.wait_feature(feature=fL.arena_star_checkout, raise_if_not_found=False):
                 self.click(result.x, result.y+0.2*self.height)
                 return True
@@ -62,7 +63,7 @@ class DailyArena:
             self.mark_task_failure("找不到关闭按钮,可能本次没有显式奖励")
         return True
     def get_arena_ticket_number(self):
-        result = self.wait_ocr(match=re.compile(r'\d+/\d+'), box=self.box_of_screen(0.798, 0.022, 0.885, 0.044))
+        result = self.wait_ocr(match=re.compile(r'\d+/\d+'), time_out=5, box=self.box_of_screen(0.780, 0.013, 0.904, 0.051))
         
         if result:
             text = result[0].name
