@@ -7,6 +7,8 @@ from ok import Box
 import numpy as np
 from src.image.frame_processes import isolate_by_hsv_ranges
 from skimage.metrics import structural_similarity as ssim
+from src.interaction.Mouse import run_at_window_pos, active_and_send_mouse_delta as send_mouse_delta
+from src.data.FeatureList import FeatureList as fL
 class RuntimeMixin:
     def wait_ui_stable(
                 self,
@@ -173,3 +175,159 @@ class RuntimeMixin:
                     return True
 
             self.sleep(loop_sleep)
+    def scroll(self, x: int, y: int, count: int) -> None:
+        """按屏幕绝对像素坐标滚轮。
+
+        Args:
+            x: 滚动位置的绝对像素 X 坐标
+            y: 滚动位置的绝对像素 Y 坐标
+            count: 滚动量。
+                正数（向上滚动）：地图 UI 放大视角 / 列表 UI 向上翻页显示靠前内容。
+                负数（向下滚动）：地图 UI 缩小视角或向下平移 / 列表 UI 向下翻页显示靠后内容。
+
+        适用场景：
+        - 地图 UI：已确定地图中心/图标附近的像素坐标时，精确缩放或平移视角。
+        - 列表 UI：已通过 OCR/特征拿到某一行条目的绝对坐标时，在该条目处滚动翻页。
+        """
+        run_at_window_pos(self.hwnd.hwnd, super().scroll, x, y, 0.5, x, y, count)
+
+    def scroll_relative(self, x: float, y: float, count: int) -> None:
+        """按屏幕相对坐标比例滚轮（x/y 范围 0~1）。
+
+        Args:
+            x: 滚动位置的相对 X 坐标（0~1，0 为左边缘，1 为右边缘）
+            y: 滚动位置的相对 Y 坐标（0~1，0 为上边缘，1 为下边缘）
+            count: 滚动量。
+                正数（向上滚动）：地图 UI 放大视角 / 列表 UI 向上翻页显示靠前内容。
+                负数（向下滚动）：地图 UI 缩小视角或向下平移 / 列表 UI 向下翻页显示靠后内容。
+
+        适用场景：
+        - 地图 UI：用 (0.5, 0.5) 等比例坐标在地图中心连续缩放，适配不同分辨率。
+        - 列表 UI：在固定相对区域（如左侧列表 0.1/0.5）滚动查找条目，避免硬编码像素。
+        """
+        run_at_window_pos(self.hwnd.hwnd, super().scroll_relative, int(x * self.width), int(y * self.height), 0.5, x,
+                          y, count)
+    def active_and_send_mouse_delta(self, dx=1, dy=1, activate=True, only_activate=False, delay=0.02, steps=3):
+        """
+        激活窗口后发送鼠标位移。
+
+        Args:
+            dx: 水平位移。
+            dy: 垂直位移。
+            activate: 是否激活窗口。
+            only_activate: 是否只激活不移动。
+            delay: 步进间隔延迟。
+            steps: 步进次数。
+
+        Returns:
+            Any: send_mouse_delta 的返回值。
+        """
+        return send_mouse_delta(self.hwnd.hwnd, dx, dy, activate, only_activate, delay, steps)
+    def ensure_main(self, esc=True, time_out=60, after_sleep=2, need_active=True):
+        """
+        确保回到主界面（游戏世界）。
+
+        Args:
+            esc: 是否在失败时执行返回键处理。
+            time_out: 等待主界面的总超时时间。
+            after_sleep: 成功后额外等待时间。
+            need_active: 是否先激活窗口。
+
+        Returns:
+            None
+
+        Raises:
+            Exception: 当无法回到主界面时抛出。
+        """
+        self.info_set("current task", f"wait main esc={esc}")
+        if not self.wait_until(
+                lambda: self.is_main(esc=esc, need_active=need_active), time_out=time_out, raise_if_not_found=False
+        ):
+            raise Exception("Please start in game world and in team!")
+        self.sleep(after_sleep)
+        self.info_set("current task", f"in main esc={esc}")
+
+    def wait_login(self):
+        """
+        处理登录界面的各种弹窗（月卡、签到、奖励等）。
+
+        Returns:
+            bool: 已进入主界面或已成功处理登录弹窗时返回 True，否则返回 False。
+        """
+        close = None
+        if not self._logged_in:
+            if self.in_main():
+                self._logged_in = True
+                return True
+            elif self.find_one(fL.login_click):
+                run_at_window_pos(self.hwnd.hwnd, super().click, self.width // 2, self.height // 2, 1, 0.5, 0.5)
+                return False
+            elif close := (
+                    self.find_one(
+                        fL.close_button,
+                        horizontal_variance=0.1,
+                        vertical_variance=0.1,
+                    )
+                    or self.find_one(fL.skip_dialog, horizontal_variance=0.1, vertical_variance=0.1)
+            ):
+                self.click(close, after_sleep=1)
+                return False
+        return False
+    def is_main(self, esc=False, need_active=True):
+        """
+        判断是否处于可执行任务的主界面状态。
+
+        Args:
+            esc: 是否在处理失败时按返回键。
+            need_active: 是否需要先激活窗口。
+
+        Returns:
+            bool: 处于主界面返回 True，否则返回 False。
+        """
+
+        self.next_frame()
+
+        if not self._logged_in and need_active:
+            self.active_and_send_mouse_delta(activate=True, only_activate=True)
+
+        # 已进入世界
+        if self.wait_until(self.in_main, time_out=1):
+            self._logged_in = True
+            return True
+
+        # 登录流程处理成功
+        if self.wait_login():
+            return True
+
+
+        # # 命中 OCR 干扰并进行了处理，当前不视为稳定主界面
+        # rules = [[
+        #     None,
+        #     None,
+        #     [self.lang.game_flow_mixin.k_8b2ca27a, self.lang.game_flow_mixin.k_7cd2e0c0],
+        #     self.box.bottom
+        # ]]
+
+        # if self.handle_ocr_rules(rules):
+        #     return False
+
+        if esc:
+            self.back(after_sleep=1.5)
+
+        return False
+
+    def in_main(self):
+        """
+        判断是否在游戏世界中（非菜单/对话状态）。
+
+        Returns:
+            bool: 当前处于游戏世界返回 True。
+        """
+        main_world_features = [fL.gift_enter]
+
+        in_world = all(self.find_one(f, vertical_variance=0.01, horizontal_variance=0.02) for f in main_world_features)
+
+        if in_world:
+            self._logged_in = True
+
+        return in_world

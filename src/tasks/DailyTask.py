@@ -23,7 +23,7 @@ class DailyTask(DailyArena, DailyGift, DailyWork, DailyCreditCollect, BaseGMTask
         self.init_config()
 
     def init_config(self):
-        self.config.update({key: True for key, _ in self.build_task_plan()})
+        self.default_config.update({key: True for key, _ in self.build_task_plan()})
 
     def build_task_plan(self):
         return [

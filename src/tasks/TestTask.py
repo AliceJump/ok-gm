@@ -1,7 +1,15 @@
+from qfluentwidgets import FluentIcon
 from src.data.FeatureList import FeatureList as fL
 from src.tasks.daily.step.daily_arena import DailyArena
 from src.tasks.BaseGMTask import BaseGMTask
-class TestTask(DailyArena, BaseGMTask):
-    def run(self):
-        self.wait_until_feature(fL.next_step, fL.skip_pk, self.box_of_screen(0.352, 0.892, 0.398, 0.921), allow_unrecognized_click=True, skip_target_check_after_action=True)
+from src.interaction.Mouse import run_at_window_pos
 
+class TestTask(DailyArena, BaseGMTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = "测试任务"
+        self.description = "这是一个测试任务，用于测试一些功能。"
+        self.icon = FluentIcon.UP
+    def run(self):
+        self.ensure_main()
+    

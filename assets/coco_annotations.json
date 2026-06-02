@@ -37,6 +37,12 @@
             "height": 1920
         },
         {
+            "id": 10,
+            "file_name": "images/0.png",
+            "width": 1080,
+            "height": 1920
+        },
+        {
             "id": 12,
             "file_name": "images/0.png",
             "width": 1080,
@@ -71,6 +77,12 @@
             "file_name": "images/0.png",
             "width": 1080,
             "height": 1920
+        },
+        {
+            "id": 19,
+            "file_name": "images/3.png",
+            "width": 1081,
+            "height": 1921
         }
     ],
     "annotations": [
@@ -359,6 +371,32 @@
             ],
             "area": 5440,
             "iscrowd": 0
+        },
+        {
+            "id": 23,
+            "image_id": 10,
+            "category_id": 23,
+            "bbox": [
+                880,
+                1784,
+                31,
+                34
+            ],
+            "area": 1054,
+            "iscrowd": 0
+        },
+        {
+            "id": 24,
+            "image_id": 19,
+            "category_id": 24,
+            "bbox": [
+                170,
+                1596,
+                46,
+                65
+            ],
+            "area": 2990,
+            "iscrowd": 0
         }
     ],
     "categories": [
@@ -470,6 +508,16 @@
         {
             "id": 22,
             "name": "shop_enter",
+            "supercategory": ""
+        },
+        {
+            "id": 23,
+            "name": "skip_dialog",
+            "supercategory": ""
+        },
+        {
+            "id": 24,
+            "name": "card_level_up",
             "supercategory": ""
         }
     ]
