@@ -13,9 +13,6 @@ class DailyReward:
             self.log_info("没有找到分割线")
         times = 0
         for split in splits:
-            if times >= 2:
-                self.log_info("点击了两次分割线了，不可能再点了")
-                break
             self.click(split, after_sleep=0.5)
             self.wait_ui_stable()
             times += 1
@@ -23,3 +20,7 @@ class DailyReward:
             for _ in range(2):
                 if not self.click_close(after_sleep=0.5):
                     break
+            if times >= 2:
+                self.log_info("点击了两次分割线了，不可能再点了")
+                break
+            self.wait_ui_stable()

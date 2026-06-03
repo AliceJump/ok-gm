@@ -6,8 +6,8 @@ class DailyWork:
         if not self.wait_click_feature(feature=fL.work_enter, raise_if_not_found=False, click_after_delay=0.5):
             self.mark_task_failure("找不到干活的门")
             return False
-        if self.click_ok(time_out=4, click_after_delay=0.5):
-            self.click_ok(settle_time=1, time_out=4, click_after_delay=0.5)
+        if self.click_ok(time_out=8, click_after_delay=0.5):
+            self.click_ok(settle_time=2, time_out=4, click_after_delay=0.5)
         self.wait_ui_stable(box=self.box_of_screen(0.044, 0.433, 0.943, 0.503))
         times = 0
         while self.wait_click_feature(feature=fL.work_select_enter, time_out=4, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.226, 0.468, 0.769, 0.527)):

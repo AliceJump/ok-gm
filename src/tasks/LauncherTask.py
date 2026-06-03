@@ -9,7 +9,6 @@ import win32process
 from pathlib import Path
 
 from src.tasks.BaseGMTask import BaseGMTask
-from src.interaction.EfInteraction import EfInteraction
 from qfluentwidgets import FluentIcon
 
 
@@ -31,18 +30,10 @@ class LauncherTask(BaseGMTask):
 
         try:
             self.log_info("开始启动游戏")
-
-            #
-            # 已经运行则直接切换
-            #
             if self._wait_for_game_window(timeout=3):
                 self.log_info("检测到游戏已经运行")
-                self._capture_game()
                 return True
 
-            #
-            # 读取 DMM 日志
-            #
             log_file = (
                 Path(os.environ["APPDATA"])
                 / "dmmgameplayer5"
@@ -133,13 +124,6 @@ class LauncherTask(BaseGMTask):
 
             self.log_info("发现游戏窗口")
 
-            #
-            # 切换 DeviceManager
-            #
-            self._capture_game()
-
-            self.log_info("游戏捕获切换完成")
-
             return True
 
         except Exception as e:
@@ -149,30 +133,6 @@ class LauncherTask(BaseGMTask):
             self.log_error(traceback.format_exc())
 
             return False
-
-    def _capture_game(self):
-
-        config = {
-            "windows": {
-                "exe": GAME_EXE,
-                "hwnd_class": GAME_HWND_CLASS,
-                "interaction": [EfInteraction],
-                "capture_method": [
-                    "WGC",
-                    "BitBlt_RenderFull",
-                    "BitBlt",
-                ],
-                "check_hdr": False,
-                "force_no_hdr": False,
-                "require_bg": True,
-            }
-        }
-
-        self.log_info("切换到游戏窗口")
-
-        self.executor.device_manager.ensure_capture(config)
-
-        self.log_info("ensure_capture成功")
 
     def _wait_for_game_window(self, timeout=120):
 
