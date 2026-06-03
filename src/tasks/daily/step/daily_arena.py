@@ -1,6 +1,5 @@
 import time
 import re
-from src.tasks.BaseGMTask import BaseGMTask
 from src.data.FeatureList import FeatureList as fL
 class DailyArena:
     def go_arena(self):
@@ -31,7 +30,7 @@ class DailyArena:
         self.log_info("开干了!")
         return True
     def check_arena_pop_up(self):
-        if self.wait_click_feature(feature=fL.arena_checkout, settle_time=1, raise_if_not_found=False, click_after_delay=0.5):
+        if self.wait_click_feature(feature=fL.arena_checkout, settle_time=1, time_out=4, raise_if_not_found=False, click_after_delay=0.5):
             self.log_info("竞技场结算界面弹出来了，可能是上次竞技场结算")
             if result:= self.wait_feature(feature=fL.arena_star_checkout, raise_if_not_found=False):
                 self.click(result.x, result.y+0.2*self.height)
@@ -53,13 +52,13 @@ class DailyArena:
             self.mark_task_failure("找不到跳过按钮，可能是卡死了")
             return False
         
-        self.wait_until_feature(fL.next_step, fL.skip_pk, self.box_of_screen(0.352, 0.892, 0.398, 0.921), allow_unrecognized_click=True, skip_target_check_after_action=True)
+        self.wait_until_feature(fL.arena_ok, fL.skip_pk, allow_unrecognized_click=True, skip_target_check_after_action=True)
 
         for _ in range(2):
             if not self.wait_click_feature(feature=fL.next_step, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.352, 0.892, 0.398, 0.921)):
                 self.mark_task_failure("找不到下一步按钮")
                 return False
-        if not self.wait_click_feature(feature=fL.close_button, time_out=4, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.544, 0.892, 0.602, 0.919)):
+        if not self.click_close(time_out=4, click_after_delay=0.5):
             self.mark_task_failure("找不到关闭按钮,可能本次没有显式奖励")
         return True
     def get_arena_ticket_number(self):

@@ -264,14 +264,16 @@ class RuntimeMixin:
                 return False
             elif close := (
                     self.find_one(
-                        fL.close_button,
-                        horizontal_variance=0.1,
+                        fL.reward_sign_in,
+                        horizontal_variance=0.3,
                         vertical_variance=0.1,
                     )
-                    or self.find_one(fL.skip_dialog, horizontal_variance=0.1, vertical_variance=0.1)
             ):
+                if close.name == fL.reward_sign_in:
+                    close.y += int(self.height // 10)
                 self.click(close, after_sleep=1)
                 return False
+            self.click(0.502, 0.958)
         return False
     def is_main(self, esc=False, need_active=True):
         """
@@ -313,8 +315,20 @@ class RuntimeMixin:
 
         if esc:
             # self.back(after_sleep=1.5)
-            self.wait_click_feature(feature=[fL.process_back_home, fL.back, fL.hall_back_home], time_out=2, raise_if_not_found=False, click_after_delay=0.5)
-
+            self.wait_click_feature(
+                feature=[
+                    fL.close_button,
+                    fL.skip_dialog,
+                    fL.process_back_home,
+                    fL.back,
+                    fL.hall_back_home,
+                ],
+                time_out=2,
+                raise_if_not_found=False,
+                click_after_delay=0.5,
+                horizontal_variance=0.1,
+                vertical_variance=0.1,
+            )
 
     def in_main(self):
         """
@@ -331,3 +345,101 @@ class RuntimeMixin:
             self._logged_in = True
 
         return in_world
+    def feature_stable(self, feature_name, box, duration):
+        if duration <= 0:
+            return True
+
+        end_time = time.time() + duration
+        while time.time() < end_time:
+            if not self.find_feature(feature_name=feature_name, box=box, frame=self.next_frame()):
+                return False
+            self.sleep(0.05)
+
+        return True
+
+
+    def click_feature(self, feature_name, preferred_box=None, time_out=5,
+                    after_sleep=0, click_after_delay=0, settle_time=0):
+        boxes = [None]
+
+        if preferred_box is not None:
+            boxes.append(preferred_box)
+
+        start_time = time.time()
+
+        while time.time() - start_time < time_out:
+            frame = self.next_frame()
+
+            for box in boxes:
+                result = self.find_feature(
+                    feature_name=feature_name,
+                    box=box,
+                    frame=frame,
+                    vertical_variance=0.1,
+                    horizontal_variance=0.1,
+                )
+
+                if result and self.feature_stable(feature_name, box, settle_time):
+                    self.sleep(click_after_delay)
+                    self.click(result, after_sleep=after_sleep)
+                    return True
+
+        return False
+
+
+    def click_ok(self, time_out=5, after_sleep=0,
+                click_after_delay=0.5, settle_time=0):
+        return self.click_feature(
+            feature_name=fL.ok_button,
+            preferred_box=self.box_of_screen(0.544, 0.892, 0.602, 0.919),
+            time_out=time_out,
+            after_sleep=after_sleep,
+            click_after_delay=click_after_delay,
+            settle_time=settle_time
+        )
+
+
+    def click_close(self, time_out=5, after_sleep=0,
+                    click_after_delay=0.5, settle_time=0):
+        return self.click_feature(
+            feature_name=fL.close_button,
+            preferred_box=self.box_of_screen(0.146, 0.884, 0.220, 0.930),
+            time_out=time_out,
+            after_sleep=after_sleep,
+            click_after_delay=click_after_delay,
+            settle_time=settle_time
+        )
+    def get_order_status(self, time_out=5):
+        boxes = [None, self.box_of_screen(0.748, 0.768, 0.769, 0.787)]
+        features = [fL.down_order_button, fL.up_order_button]
+
+        start_time = time.time()
+
+        while time.time() - start_time < time_out:
+            for feature in features:
+                for box in boxes:
+                    if result := self.find_feature(feature_name=feature, box=box):
+                        return result, "down" if feature == fL.down_order_button else "up"
+
+            self.sleep(0.05)
+
+        return None, None
+    def switch_order(self, target_order="up"):
+        switch_order, status = self.get_order_status()
+        if not status:
+            self.log_info("无法获取当前排序状态，无法切换")
+            return False
+        current_order = status
+        if current_order == target_order:
+            self.log_info(f"当前已经是{target_order}序了，无需切换")
+            return True
+        else:
+            self.sleep(0.5)
+            self.click(switch_order, after_sleep=0.5)
+            _, new_status = self.get_order_status()
+            if new_status and new_status == target_order:
+                self.log_info(f"成功切换到{target_order}序")
+                return True
+            else:
+                self.log_info(f"切换排序失败，当前仍然是{current_order}序")
+                return False

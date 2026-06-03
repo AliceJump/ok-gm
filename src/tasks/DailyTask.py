@@ -11,8 +11,18 @@ from src.tasks.daily.step.daily_arena import DailyArena
 from src.tasks.daily.step.daily_gift import DailyGift
 from src.tasks.daily.step.daily_work import DailyWork
 from src.tasks.daily.step.daily_credit_collect import DailyCreditCollect
+from src.tasks.daily.step.daily_shop import DailyShop
+from src.tasks.daily.step.daily_up_card import DailyUpCard
+from src.tasks.daily.step.daily_reward import DailyReward
+from src.tasks.mixin.shop_mixin import ShopMixin
+from src.data.FeatureList import FeatureList as fL
 
-class DailyTask(DailyArena, DailyGift, DailyWork, DailyCreditCollect, BaseGMTask):
+class DailyTask(
+    DailyArena, DailyGift, DailyWork, 
+    DailyCreditCollect, DailyShop, DailyUpCard, 
+    DailyReward, 
+    ShopMixin, 
+    BaseGMTask):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,6 +34,7 @@ class DailyTask(DailyArena, DailyGift, DailyWork, DailyCreditCollect, BaseGMTask
 
     def init_config(self):
         self.default_config.update({key: True for key, _ in self.build_task_plan()})
+        self.default_config["购买角色碎片"] = False
 
     def build_task_plan(self):
         return [
@@ -31,6 +42,9 @@ class DailyTask(DailyArena, DailyGift, DailyWork, DailyCreditCollect, BaseGMTask
             ("收小礼物", self.go_gift),
             ("打工", self.go_work),
             ("收米", self.go_credit_collect),
+            ("商店", self.go_shop),
+            ("升级卡片", self.go_up_card),
+            ("领取奖励", self.go_reward),
         ]
 
     def run(self):

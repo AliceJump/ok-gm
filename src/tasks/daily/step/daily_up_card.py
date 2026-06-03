@@ -1,0 +1,21 @@
+from src.data.FeatureList import FeatureList as fL
+class DailyUpCard:
+    def go_up_card(self):
+        self.log_info("开始升级支援卡...")
+        if not self.wait_click_feature(feature=fL.switch_baby_page, raise_if_not_found=False, click_after_delay=0.5):
+            self.mark_task_failure("找不到升级支援卡的门")
+            return False
+        if not self.wait_click_feature(feature=fL.support_card_enter, time_out=4, raise_if_not_found=False, click_after_delay=0.5):
+            self.mark_task_failure("找不到升级支援卡界面的进入按钮")
+            return False
+        if self.switch_order(target_order="up"):
+            self.log_info("切换到升序成功")
+        self.sleep(0.5)
+        self.click(0.196, 0.373, after_sleep=0.5) # 点击第一个卡片
+        if not self.wait_click_feature(feature=fL.card_level_up, time_out=4, raise_if_not_found=False, click_after_delay=0.5):
+            self.mark_task_failure("找不到升级按钮")
+            return False
+        if not self.wait_click_feature(feature=fL.next_step, time_out=4, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.550, 0.892, 0.598, 0.921)):
+            self.mark_task_failure("找不到下一步按钮")
+            return False
+        return True
