@@ -30,6 +30,7 @@ class DailyTask(
         self.description = "自动完成日常任务，包括竞技场、收小礼物、打工和收米等。"
         self.icon = FluentIcon.SYNC
         self.daily_runner: DailyTaskRunner | None = None
+        self.support_schedule_task = True
         self.init_config()
 
     def init_config(self):
