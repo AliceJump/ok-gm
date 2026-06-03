@@ -1,4 +1,3 @@
-import re
 import tempfile
 import os
 import webbrowser
@@ -36,6 +35,19 @@ class DailyTask(
     def init_config(self):
         self.default_config.update({key: True for key, _ in self.build_task_plan()})
         self.default_config["购买角色碎片"] = False
+        self.config_description.update({
+            "购买角色碎片": "是否在日常商店购买角色碎片",
+        })
+        self.config_description.update({
+            "竞技场": "是否自动参与竞技场挑战",
+            "收小礼物": "是否自动领取日常礼物奖励",
+            "打工": "执行小偶像打工任务获取资源",
+            "收米": "领取收益/金币类奖励",
+            "商店": "进入商店执行日常购买操作",
+            "升级卡片": "升级一次支援卡",
+            "领取奖励": "领取日常周常奖励",
+            "购买角色碎片": "是否在商店任务购买角色碎片",
+        })
 
     def build_task_plan(self):
         return [
