@@ -71,12 +71,14 @@ class DailyArena:
                 try:
                     current = int(current)
                     total = int(total)
-                    self.pk_ok = True
+                    self.all_ok = True
                     return current, total
                 except ValueError:
                     self.mark_task_failure(f"竞技场票OCR结果解析失败: {text}")
-                    self.pk_ok = False
+                    self.all_ok = False
+                    self.unfinished_count = getattr(self, "unfinished_count", 0) + 1
                     return 0, 0
         self.mark_task_failure("未找到竞技场票OCR结果")
-        self.pk_ok = False
+        self.all_ok = False
+        self.unfinished_count = getattr(self, "unfinished_count", 0) + 1
         return 0, 0

@@ -3,8 +3,8 @@ from src.data.FeatureList import FeatureList as fL
 
 class DailyCoinRandom:
     def go_coin_random(self):
-        if getattr(self, "pk_ok", False):
-            self.log_info("配置里设置了pk_ok，跳过小偶像硬币抽奖")
+        if getattr(self, "all_ok", False):
+            self.log_info("配置里设置了all_ok，跳过小偶像硬币抽奖")
             return True
         if not self.go_coin_page():
             return False
@@ -13,8 +13,7 @@ class DailyCoinRandom:
             self.mark_task_failure("没有找到满足条件的硬币，放弃点击。")
             return False
         if not self.change_cost():
-            self.mark_task_failure("修改硬币消耗失败")
-            return False
+            self.log_info("修改硬币消耗失败")
         if not self.click_ok():
             self.mark_task_failure("未找到确认按钮")
             return False
@@ -22,6 +21,7 @@ class DailyCoinRandom:
             self.mark_task_failure("未找到关闭按钮")
             return False
         self.log_info("完成了！")
+        self.unfinished_count = getattr(self, "unfinished_count", 0) - 1
         return True
     def go_coin_page(self):
         self.log_info("开始找小偶像硬币抽奖...")
