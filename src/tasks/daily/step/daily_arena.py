@@ -54,8 +54,8 @@ class DailyArena:
         
         self.wait_until_feature(fL.arena_ok, fL.skip_pk, allow_unrecognized_click=True, skip_target_check_after_action=True)
 
-        for _ in range(2):
-            if not self.wait_click_feature(feature=fL.next_step, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.352, 0.892, 0.398, 0.921)):
+        for i in range(2):
+            if not self.wait_click_feature(feature=fL.next_step, raise_if_not_found=False, click_after_delay=i+1, box=self.box_of_screen(0.352, 0.892, 0.398, 0.921)):
                 self.mark_task_failure("找不到下一步按钮")
                 return False
         if not self.click_close(time_out=4, click_after_delay=0.5):

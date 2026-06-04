@@ -388,7 +388,7 @@ class RuntimeMixin:
                     box=box,
                     frame=frame,
                     vertical_variance=0.1,
-                    horizontal_variance=0.1,
+                    horizontal_variance=0.2,
                 )
 
                 if result and self.feature_stable(feature_name, box, settle_time):

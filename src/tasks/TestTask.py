@@ -16,7 +16,6 @@ class TestTask(BaseGMTask, DailyCoinRandom, ShopMixin):
         self.description = "这是一个测试任务，用于测试一些功能。"
         self.icon = FluentIcon.UP
     def run(self):
-       self.ensure_main()
-       self.go_coin_random()
+       self.click_close()
 
 
