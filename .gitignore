@@ -12,7 +12,6 @@ data_export
 data_import
 __pycache__/
 *.msgpack
-data/
 ok_tasks/
 *$py.class
 configs/
