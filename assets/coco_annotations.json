@@ -149,6 +149,18 @@
             "file_name": "images/3.png",
             "width": 1081,
             "height": 1921
+        },
+        {
+            "id": 31,
+            "file_name": "images/4.png",
+            "width": 1081,
+            "height": 1921
+        },
+        {
+            "id": 32,
+            "file_name": "images/3.png",
+            "width": 1081,
+            "height": 1921
         }
     ],
     "annotations": [
@@ -645,6 +657,58 @@
             ],
             "area": 676,
             "iscrowd": 0
+        },
+        {
+            "id": 39,
+            "image_id": 28,
+            "category_id": 40,
+            "bbox": [
+                613,
+                1215,
+                66,
+                65
+            ],
+            "area": 4290,
+            "iscrowd": 0
+        },
+        {
+            "id": 40,
+            "image_id": 31,
+            "category_id": 39,
+            "bbox": [
+                959,
+                482,
+                19,
+                38
+            ],
+            "area": 722,
+            "iscrowd": 0
+        },
+        {
+            "id": 41,
+            "image_id": 32,
+            "category_id": 41,
+            "bbox": [
+                174,
+                1328,
+                54,
+                42
+            ],
+            "area": 2268,
+            "iscrowd": 0
+        },
+        {
+            "id": 42,
+            "image_id": 32,
+            "category_id": 42,
+            "bbox": [
+                854,
+                1322,
+                53,
+                53
+            ],
+            "area": 2809,
+            "iscrowd": 0
         }
     ],
     "categories": [
@@ -836,6 +900,26 @@
         {
             "id": 38,
             "name": "up_order_button",
+            "supercategory": ""
+        },
+        {
+            "id": 39,
+            "name": "info_click",
+            "supercategory": ""
+        },
+        {
+            "id": 40,
+            "name": "coin_random_enter",
+            "supercategory": ""
+        },
+        {
+            "id": 41,
+            "name": "subtraction_button",
+            "supercategory": ""
+        },
+        {
+            "id": 42,
+            "name": "add_button",
             "supercategory": ""
         }
     ]

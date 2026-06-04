@@ -5,6 +5,7 @@ import time
 from PIL import Image
 from ok import Box
 import numpy as np
+import pyautogui
 from src.image.frame_processes import isolate_by_hsv_ranges
 from skimage.metrics import structural_similarity as ssim
 from src.interaction.Mouse import run_at_window_pos, active_and_send_mouse_delta as send_mouse_delta
@@ -189,7 +190,7 @@ class RuntimeMixin:
         - 地图 UI：已确定地图中心/图标附近的像素坐标时，精确缩放或平移视角。
         - 列表 UI：已通过 OCR/特征拿到某一行条目的绝对坐标时，在该条目处滚动翻页。
         """
-        run_at_window_pos(self.hwnd.hwnd, super().scroll, x, y, 0.5, x, y, count)
+        run_at_window_pos(self.hwnd.hwnd, self.do_scroll, x, y, 0.5, count)
 
     def scroll_relative(self, x: float, y: float, count: int) -> None:
         """按屏幕相对坐标比例滚轮（x/y 范围 0~1）。
@@ -205,8 +206,15 @@ class RuntimeMixin:
         - 地图 UI：用 (0.5, 0.5) 等比例坐标在地图中心连续缩放，适配不同分辨率。
         - 列表 UI：在固定相对区域（如左侧列表 0.1/0.5）滚动查找条目，避免硬编码像素。
         """
-        run_at_window_pos(self.hwnd.hwnd, super().scroll_relative, int(x * self.width), int(y * self.height), 0.5, x,
-                          y, count)
+        run_at_window_pos(self.hwnd.hwnd, self.do_scroll, int(x * self.width), int(y * self.height), 0.5, count)
+    
+    def do_scroll(self, times):
+        direction = 1 if times >= 0 else -1
+        self.active_and_send_mouse_delta(activate=True, only_activate=True)
+        for _ in range(abs(times)):
+            pyautogui.scroll(direction)
+            self.sleep(0.1)
+            
     def active_and_send_mouse_delta(self, dx=1, dy=1, activate=True, only_activate=False, delay=0.02, steps=3):
         """
         激活窗口后发送鼠标位移。
@@ -256,7 +264,7 @@ class RuntimeMixin:
         """
         close = None
         if not self._logged_in:
-            if self.in_main():
+            if self.in_main() or self.find_one(feature_name=[fL.back, fL.process_back_home, fL.hall_back_home]):
                 self._logged_in = True
                 return True
             elif self.find_one(fL.login_click):
@@ -272,6 +280,8 @@ class RuntimeMixin:
                 if close.name == fL.reward_sign_in:
                     close.y += int(self.height // 10)
                 self.click(close, after_sleep=1)
+                return False
+            elif self.click_ok(time_out=1, after_sleep=0):
                 return False
             self.click(0.502, 0.958)
         return False
@@ -320,8 +330,8 @@ class RuntimeMixin:
                     fL.close_button,
                     fL.skip_dialog,
                     fL.process_back_home,
-                    fL.back,
                     fL.hall_back_home,
+                    fL.back,
                 ],
                 time_out=2,
                 raise_if_not_found=False,
@@ -359,13 +369,15 @@ class RuntimeMixin:
 
 
     def click_feature(self, feature_name, preferred_box=None, time_out=5,
-                    after_sleep=0, click_after_delay=0, settle_time=0):
+                    after_sleep=0, click_after_delay=0, settle_time=0,
+                    blind_point=None, blind_delay=1):
         boxes = [None]
 
         if preferred_box is not None:
             boxes.append(preferred_box)
 
         start_time = time.time()
+        last_blind_time = 0
 
         while time.time() - start_time < time_out:
             frame = self.next_frame()
@@ -384,30 +396,41 @@ class RuntimeMixin:
                     self.click(result, after_sleep=after_sleep)
                     return True
 
+            # ——新增：盲点加速尝试（非阻塞识别）——
+            if blind_point and (time.time() - last_blind_time >= blind_delay):
+                self.click(blind_point[0], blind_point[1], after_sleep=after_sleep)
+                last_blind_time = time.time()
+
         return False
 
 
     def click_ok(self, time_out=5, after_sleep=0,
-                click_after_delay=0.5, settle_time=0):
+                click_after_delay=0.5, settle_time=0,
+                blind_point=None, blind_delay=1):
         return self.click_feature(
             feature_name=fL.ok_button,
             preferred_box=self.box_of_screen(0.544, 0.892, 0.602, 0.919),
             time_out=time_out,
             after_sleep=after_sleep,
             click_after_delay=click_after_delay,
-            settle_time=settle_time
+            settle_time=settle_time,
+            blind_point=blind_point,
+            blind_delay=blind_delay
         )
 
 
     def click_close(self, time_out=5, after_sleep=0,
-                    click_after_delay=0.5, settle_time=0):
+                    click_after_delay=0.5, settle_time=0,
+                    blind_point=None, blind_delay=1):
         return self.click_feature(
             feature_name=fL.close_button,
             preferred_box=self.box_of_screen(0.146, 0.884, 0.220, 0.930),
             time_out=time_out,
             after_sleep=after_sleep,
             click_after_delay=click_after_delay,
-            settle_time=settle_time
+            settle_time=settle_time,
+            blind_point=blind_point,
+            blind_delay=blind_delay
         )
     def get_order_status(self, time_out=5):
         boxes = [None, self.box_of_screen(0.748, 0.768, 0.769, 0.787)]

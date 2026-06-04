@@ -13,13 +13,14 @@ from src.tasks.daily.step.daily_credit_collect import DailyCreditCollect
 from src.tasks.daily.step.daily_shop import DailyShop
 from src.tasks.daily.step.daily_up_card import DailyUpCard
 from src.tasks.daily.step.daily_reward import DailyReward
+from src.tasks.daily.step.daily_coin_random import DailyCoinRandom
 from src.tasks.mixin.shop_mixin import ShopMixin
 from src.data.FeatureList import FeatureList as fL
 
 class DailyTask(
     DailyArena, DailyGift, DailyWork, 
     DailyCreditCollect, DailyShop, DailyUpCard, 
-    DailyReward, 
+    DailyReward, DailyCoinRandom,
     ShopMixin, 
     BaseGMTask):
 
@@ -57,6 +58,7 @@ class DailyTask(
             ("收米", self.go_credit_collect),
             ("商店", self.go_shop),
             ("升级卡片", self.go_up_card),
+            ("_小偶像硬币抽奖", self.go_coin_random),
             ("领取奖励", self.go_reward),
         ]
 

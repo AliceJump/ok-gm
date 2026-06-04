@@ -69,9 +69,14 @@ class DailyArena:
             if '/' in text:
                 current, total = text.split('/')
                 try:
-                    return int(current), int(total)
+                    current = int(current)
+                    total = int(total)
+                    self.pk_ok = True
+                    return current, total
                 except ValueError:
                     self.mark_task_failure(f"竞技场票OCR结果解析失败: {text}")
+                    self.pk_ok = False
                     return 0, 0
         self.mark_task_failure("未找到竞技场票OCR结果")
+        self.pk_ok = False
         return 0, 0

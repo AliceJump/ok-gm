@@ -17,8 +17,8 @@ class DailyReward:
             self.wait_ui_stable()
             times += 1
             self.wait_click_feature(feature=fL.next_step, vertical_variance=0.1, horizontal_variance=0.1, raise_if_not_found=False, click_after_delay=0.5)
-            for _ in range(2):
-                if not self.click_close(after_sleep=0.5):
+            for i in range(2):
+                if not self.click_close(after_sleep=0.5, time_out=4*(i+1)):
                     break
             if times >= 2:
                 self.log_info("点击了两次分割线了，不可能再点了")
