@@ -6,7 +6,7 @@ import os
 import requests
 
 OWNER = os.getenv("GITHUB_OWNER", "AliceJump")
-REPO = os.getenv("GITHUB_REPO", "ok-end-field")
+REPO = os.getenv("GITHUB_REPO", "ok-gm")
 TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
 
 ASSETS_DIR = Path("assets")
