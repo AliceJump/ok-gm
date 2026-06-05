@@ -188,7 +188,7 @@ python -m unittest tests/TestEssenceRecognizer.py
   by [SignPath Foundation](https://signpath.org/).
 
 ### 致谢
-
+* [a4nqi3n/Gakumas_Launcher](https://github.com/a4nqi3n/Gakumas_Launcher)(`参考该仓库通过log获取启动游戏参数的方式`)
 * [ok-oldking/OnnxOCR](https://github.com/ok-oldking/OnnxOCR)
 * [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
 * [Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)

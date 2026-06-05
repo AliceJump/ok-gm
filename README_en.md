@@ -184,7 +184,7 @@ This project is developed using the [ok-script](https://github.com/ok-oldking/ok
 * **EXE Code Signing**: Free code signing provided by [SignPath.io](https://signpath.io/), certificate provided by [SignPath Foundation](https://signpath.org/).
 
 ### Special Thanks
-
+* [a4nqi3n/Gakumas_Launcher](https://github.com/a4nqi3n/Gakumas_Launcher)(`Refer to the method used in this repository to obtain the game launch parameters from the logs.`)
 * [ok-oldking/OnnxOCR](https://github.com/ok-oldking/OnnxOCR)
 * [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
 * [Toufool/AutoSplit](https://github.com/Toufool/AutoSplit)
