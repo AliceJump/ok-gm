@@ -1,118 +1,169 @@
+from datetime import datetime
 
 import cv2
 import imagehash
 import time
 from PIL import Image
 from ok import Box
+from enum import Enum
 import numpy as np
 import pyautogui
 from src.image.frame_processes import isolate_by_hsv_ranges
 from skimage.metrics import structural_similarity as ssim
-from src.interaction.Mouse import run_at_window_pos, active_and_send_mouse_delta as send_mouse_delta
+from src.interaction.Mouse import (
+    run_at_window_pos,
+    active_and_send_mouse_delta as send_mouse_delta,
+)
 from src.data.FeatureList import FeatureList as fL
+
+
+class ScreenRow(Enum):
+    MIDDLE = "middle"
+    BOTTOM = "bottom"
+
+
+BUTTON_ROW_Y = {
+    ScreenRow.MIDDLE: (0.880, 0.930),
+    ScreenRow.BOTTOM: (0.929, 0.969),
+}
+
+BUTTON_COL_X = [
+    (0.140, 0.220),
+    (0.337, 0.413),
+    (0.540, 0.613),
+]
+
+
 class RuntimeMixin:
+    @property
+    def ok_or_close_boxes(self):
+        return self.get_ok_or_close_boxes()
+
+    def get_ok_or_close_boxes(self, row=ScreenRow.MIDDLE):
+        y1, y2 = BUTTON_ROW_Y[row]
+
+        return [self.box_of_screen(x1, y1, x2, y2) for x1, x2 in BUTTON_COL_X]
+
     def wait_ui_stable(
-                self,
-                method="phash",
-                threshold: int = 5,
-                stable_time: float = 0.5,
-                max_wait: float = 5,
-                refresh_interval: float = 0.2,
-                box: Box | tuple | list | None = None,
-        ):
-            """
-            等待指定区域在视觉上稳定下来。
+        self,
+        method="phash",
+        threshold: int = 5,
+        stable_time: float = 0.5,
+        max_wait: float = 5,
+        refresh_interval: float = 0.2,
+        box: Box | tuple | list | None = None,
+    ):
+        """
+        等待指定区域在视觉上稳定下来。
 
-            Args:
-                method: 稳定性判断方法。
-                threshold: 稳定阈值。
-                stable_time: 持续稳定时长。
-                max_wait: 最长等待时间。
-                refresh_interval: 帧刷新间隔。
-                box: 需要监测的区域。
+        Args:
+            method: 稳定性判断方法。
+            threshold: 稳定阈值。
+            stable_time: 持续稳定时长。
+            max_wait: 最长等待时间。
+            refresh_interval: 帧刷新间隔。
+            box: 需要监测的区域。
 
-            Returns:
-                bool: 稳定后返回 True，超时返回 False。
+        Returns:
+            bool: 稳定后返回 True，超时返回 False。
 
-            Raises:
-                ValueError: 当 method 不支持或 box 非法时抛出。
-            """
-            def parse_box(frame, box: Box | tuple | list | None):
-                if box is None:
-                    return frame
+        Raises:
+            ValueError: 当 method 不支持或 box 非法时抛出。
+        """
 
-                if hasattr(box, "x"):
-                    x = int(box.x)
-                    y = int(box.y)
-                    w = int(box.width)
-                    h = int(box.height)
-                    return frame[y:y + h, x:x + w]
+        def parse_box(frame, box: Box | tuple | list | None):
+            if box is None:
+                return frame
 
-                if isinstance(box, (tuple, list)) and len(box) == 4:
-                    x, y, w, h = map(int, box)
-                    return frame[y:y + h, x:x + w]
+            if hasattr(box, "x"):
+                x = int(box.x)
+                y = int(box.y)
+                w = int(box.width)
+                h = int(box.height)
+                return frame[y : y + h, x : x + w]
 
-                raise ValueError("box must be None / (x,y,w,h) / object(x,y,width,height)")
+            if isinstance(box, (tuple, list)) and len(box) == 4:
+                x, y, w, h = map(int, box)
+                return frame[y : y + h, x : x + w]
 
-            start_time = time.time()
-            last_frame = parse_box(self.next_frame(), box)
-            stable_start = None
+            raise ValueError("box must be None / (x,y,w,h) / object(x,y,width,height)")
 
-            while True:
-                current_frame = parse_box(self.next_frame(), box)
+        start_time = time.time()
+        last_frame = parse_box(self.next_frame(), box)
+        stable_start = None
 
-                if method in ("phash", "dhash"):
-                    img1 = Image.fromarray(last_frame)
-                    img2 = Image.fromarray(current_frame)
+        while True:
+            current_frame = parse_box(self.next_frame(), box)
 
-                    h1 = imagehash.phash(img1) if method == "phash" else imagehash.dhash(img1)
-                    h2 = imagehash.phash(img2) if method == "phash" else imagehash.dhash(img2)
+            if method in ("phash", "dhash"):
+                img1 = Image.fromarray(last_frame)
+                img2 = Image.fromarray(current_frame)
 
-                    is_stable = (h1 - h2) <= threshold
+                h1 = (
+                    imagehash.phash(img1)
+                    if method == "phash"
+                    else imagehash.dhash(img1)
+                )
+                h2 = (
+                    imagehash.phash(img2)
+                    if method == "phash"
+                    else imagehash.dhash(img2)
+                )
 
-                elif method == "pixel":
-                    if last_frame.shape != current_frame.shape:
-                        is_stable = False
-                    else:
-                        diff = cv2.absdiff(last_frame, current_frame)
-                        is_stable = np.mean(diff) <= threshold
+                is_stable = (h1 - h2) <= threshold
 
-                elif method == "ssim":
-                    last_gray = cv2.cvtColor(last_frame, cv2.COLOR_BGR2GRAY)
-                    current_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
-
-                    if last_gray.shape != current_gray.shape:
-                        is_stable = False
-                    else:
-                        score, _ = ssim(last_gray, current_gray, full=True)
-                        is_stable = score >= threshold
-
+            elif method == "pixel":
+                if last_frame.shape != current_frame.shape:
+                    is_stable = False
                 else:
-                    raise ValueError(f"Unknown method {method}")
+                    diff = cv2.absdiff(last_frame, current_frame)
+                    is_stable = np.mean(diff) <= threshold
 
-                if is_stable:
-                    if stable_start is None:
-                        stable_start = time.time()
-                    elif time.time() - stable_start >= stable_time:
-                        return True
+            elif method == "ssim":
+                last_gray = cv2.cvtColor(last_frame, cv2.COLOR_BGR2GRAY)
+                current_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
+
+                if last_gray.shape != current_gray.shape:
+                    is_stable = False
                 else:
-                    stable_start = None
+                    score, _ = ssim(last_gray, current_gray, full=True)
+                    is_stable = score >= threshold
 
-                if time.time() - start_time > max_wait:
-                    return False
+            else:
+                raise ValueError(f"Unknown method {method}")
 
-                last_frame = current_frame
-                self.sleep(refresh_interval)
+            if is_stable:
+                if stable_start is None:
+                    stable_start = time.time()
+                elif time.time() - stable_start >= stable_time:
+                    return True
+            else:
+                stable_start = None
+
+            if time.time() - start_time > max_wait:
+                return False
+
+            last_frame = current_frame
+            self.sleep(refresh_interval)
+
     def make_hsv_isolator(self, ranges):
         """返回一个可直接调用的 HSV 过滤函数"""
         return lambda frame, invert=True, kernel_size=2: isolate_by_hsv_ranges(
             frame, ranges, invert=invert, kernel_size=kernel_size
         )
-    def wait_until_feature(self, target_feature, action_feature, box=None,
-                        timeout=60, click_delay=0.5, loop_sleep=0.8,
-                        allow_unrecognized_click=False,
-                        block_until_action=True,
-                        skip_target_check_after_action=False):
+
+    def wait_until_feature(
+        self,
+        target_feature,
+        action_feature,
+        box=None,
+        timeout=60,
+        click_delay=0.5,
+        loop_sleep=0.8,
+        allow_unrecognized_click=False,
+        block_until_action=True,
+        skip_target_check_after_action=False,
+    ):
         """等待点击 action_feature 后，target_feature 出现。
 
         先尝试点击指定的 action_feature（操作特征），然后等待 target_feature（目标特征）
@@ -145,7 +196,9 @@ class RuntimeMixin:
         while True:
             elapsed = time.time() - start_time
             if elapsed > timeout:
-                self.mark_task_failure(f"等待 {target_feature} 超时 (已等待 {elapsed:.1f}s)")
+                self.mark_task_failure(
+                    f"等待 {target_feature} 超时 (已等待 {elapsed:.1f}s)"
+                )
                 return False
 
             # ==================== 1. 处理 Action ====================
@@ -153,13 +206,13 @@ class RuntimeMixin:
                 feature=action_feature,
                 raise_if_not_found=False,
                 click_after_delay=click_delay,
-                time_out=1
+                time_out=1,
             )
 
             if clicked:
                 action_triggered = True
                 self.log_info(f"已触发 action: {action_feature}")
-                
+
                 # 如果设置了跳过本轮target检测，则直接进入下一次循环
                 if skip_target_check_after_action:
                     self.sleep(loop_sleep)
@@ -176,6 +229,7 @@ class RuntimeMixin:
                     return True
 
             self.sleep(loop_sleep)
+
     def scroll(self, x: int, y: int, count: int) -> None:
         """按屏幕绝对像素坐标滚轮。
 
@@ -206,16 +260,25 @@ class RuntimeMixin:
         - 地图 UI：用 (0.5, 0.5) 等比例坐标在地图中心连续缩放，适配不同分辨率。
         - 列表 UI：在固定相对区域（如左侧列表 0.1/0.5）滚动查找条目，避免硬编码像素。
         """
-        run_at_window_pos(self.hwnd.hwnd, self.do_scroll, int(x * self.width), int(y * self.height), 0.5, count)
-    
+        run_at_window_pos(
+            self.hwnd.hwnd,
+            self.do_scroll,
+            int(x * self.width),
+            int(y * self.height),
+            0.5,
+            count,
+        )
+
     def do_scroll(self, times):
         direction = 1 if times >= 0 else -1
         self.active_and_send_mouse_delta(activate=True, only_activate=True)
         for _ in range(abs(times)):
             pyautogui.scroll(direction)
             self.sleep(0.1)
-            
-    def active_and_send_mouse_delta(self, dx=1, dy=1, activate=True, only_activate=False, delay=0.02, steps=3):
+
+    def active_and_send_mouse_delta(
+        self, dx=1, dy=1, activate=True, only_activate=False, delay=0.02, steps=3
+    ):
         """
         激活窗口后发送鼠标位移。
 
@@ -230,7 +293,10 @@ class RuntimeMixin:
         Returns:
             Any: send_mouse_delta 的返回值。
         """
-        return send_mouse_delta(self.hwnd.hwnd, dx, dy, activate, only_activate, delay, steps)
+        return send_mouse_delta(
+            self.hwnd.hwnd, dx, dy, activate, only_activate, delay, steps
+        )
+
     def ensure_main(self, esc=True, time_out=60, after_sleep=2, need_active=True):
         """
         确保回到主界面（游戏世界）。
@@ -249,7 +315,9 @@ class RuntimeMixin:
         """
         self.info_set("current task", f"wait main esc={esc}")
         if not self.wait_until(
-                lambda: self.is_main(esc=esc, need_active=need_active), time_out=time_out, raise_if_not_found=False
+            lambda: self.is_main(esc=esc, need_active=need_active),
+            time_out=time_out,
+            raise_if_not_found=False,
         ):
             raise Exception("Please start in game world and in team!")
         self.sleep(after_sleep)
@@ -264,18 +332,28 @@ class RuntimeMixin:
         """
         close = None
         if not self._logged_in:
-            if self.in_main() or self.find_one(feature_name=[fL.back, fL.process_back_home, fL.hall_back_home]):
+            if self.in_main() or self.find_one(
+                feature_name=[fL.back, fL.process_back_home, fL.hall_back_home]
+            ):
                 self._logged_in = True
                 return True
             elif self.find_one(fL.login_click):
-                run_at_window_pos(self.hwnd.hwnd, super().click, self.width // 2, self.height // 2, 1, 0.5, 0.5)
+                run_at_window_pos(
+                    self.hwnd.hwnd,
+                    super().click,
+                    self.width // 2,
+                    self.height // 2,
+                    1,
+                    0.5,
+                    0.5,
+                )
                 return False
             elif close := (
-                    self.find_one(
-                        fL.reward_sign_in,
-                        horizontal_variance=0.3,
-                        vertical_variance=0.1,
-                    )
+                self.find_one(
+                    fL.reward_sign_in,
+                    horizontal_variance=0.3,
+                    vertical_variance=0.1,
+                )
             ):
                 if close.name == fL.reward_sign_in:
                     close.y += int(self.height // 10)
@@ -285,6 +363,7 @@ class RuntimeMixin:
                 return False
             self.click(0.502, 0.958)
         return False
+
     def is_main(self, esc=False, need_active=True):
         """
         判断是否处于可执行任务的主界面状态。
@@ -311,7 +390,6 @@ class RuntimeMixin:
         if self.wait_login():
             return True
 
-
         # # 命中 OCR 干扰并进行了处理，当前不视为稳定主界面
         # rules = [[
         #     None,
@@ -328,6 +406,7 @@ class RuntimeMixin:
             self.wait_click_feature(
                 feature=[
                     fL.close_button,
+                    fL.align_close_button,
                     fL.skip_dialog,
                     fL.process_back_home,
                     fL.hall_back_home,
@@ -349,32 +428,42 @@ class RuntimeMixin:
         """
         main_world_features = [fL.gift_enter]
 
-        in_world = all(self.find_one(f, vertical_variance=0.01, horizontal_variance=0.02) for f in main_world_features)
+        in_world = all(
+            self.find_one(f, vertical_variance=0.01, horizontal_variance=0.02)
+            for f in main_world_features
+        )
 
         if in_world:
             self._logged_in = True
 
         return in_world
+
     def feature_stable(self, feature_name, box, duration):
         if duration <= 0:
             return True
 
         end_time = time.time() + duration
         while time.time() < end_time:
-            if not self.find_feature(feature_name=feature_name, box=box, frame=self.next_frame()):
+            if not self.find_feature(
+                feature_name=feature_name, box=box, frame=self.next_frame()
+            ):
                 return False
             self.sleep(0.05)
 
         return True
 
-
-    def click_feature(self, feature_name, preferred_box=None, time_out=5,
-                    after_sleep=0, click_after_delay=0, settle_time=0,
-                    blind_point=None, blind_delay=1):
-        boxes = [None]
-
-        if preferred_box is not None:
-            boxes.append(preferred_box)
+    def click_feature(
+        self,
+        feature_name,
+        boxes=None,
+        time_out=5,
+        after_sleep=0,
+        click_after_delay=0,
+        settle_time=0,
+        blind_point=None,
+        blind_delay=1,
+    ):
+        boxes = [None] + (boxes or [])
 
         start_time = time.time()
         last_blind_time = 0
@@ -387,51 +476,70 @@ class RuntimeMixin:
                     feature_name=feature_name,
                     box=box,
                     frame=frame,
-                    vertical_variance=0.1,
-                    horizontal_variance=0.2,
                 )
 
                 if result and self.feature_stable(feature_name, box, settle_time):
                     self.sleep(click_after_delay)
+
+                    self.screenshot(
+                        name=f"样本收集_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    )
+
                     self.click(result, after_sleep=after_sleep)
                     return True
 
-            # ——新增：盲点加速尝试（非阻塞识别）——
             if blind_point and (time.time() - last_blind_time >= blind_delay):
-                self.click(blind_point[0], blind_point[1], after_sleep=after_sleep)
+                self.click(
+                    blind_point[0],
+                    blind_point[1],
+                    after_sleep=after_sleep,
+                )
                 last_blind_time = time.time()
 
         return False
 
-
-    def click_ok(self, time_out=5, after_sleep=0,
-                click_after_delay=0.5, settle_time=0,
-                blind_point=None, blind_delay=1):
+    def click_ok(
+        self,
+        row=ScreenRow.MIDDLE,
+        time_out=5,
+        after_sleep=0,
+        click_after_delay=0.5,
+        settle_time=0,
+        blind_point=None,
+        blind_delay=1,
+    ):
         return self.click_feature(
             feature_name=fL.ok_button,
-            preferred_box=self.box_of_screen(0.544, 0.892, 0.602, 0.919),
+            boxes=self.get_ok_or_close_boxes(row=row),
             time_out=time_out,
             after_sleep=after_sleep,
             click_after_delay=click_after_delay,
             settle_time=settle_time,
             blind_point=blind_point,
-            blind_delay=blind_delay
+            blind_delay=blind_delay,
         )
 
-
-    def click_close(self, time_out=5, after_sleep=0,
-                    click_after_delay=0.5, settle_time=0,
-                    blind_point=None, blind_delay=1):
+    def click_close(
+        self,
+        row=ScreenRow.MIDDLE,
+        time_out=5,
+        after_sleep=0,
+        click_after_delay=0.5,
+        settle_time=0,
+        blind_point=None,
+        blind_delay=1,
+    ):
         return self.click_feature(
             feature_name=[fL.close_button, fL.align_close_button],
-            preferred_box=self.box_of_screen(0.146, 0.884, 0.220, 0.930),
+            boxes=self.get_ok_or_close_boxes(row=row),
             time_out=time_out,
             after_sleep=after_sleep,
             click_after_delay=click_after_delay,
             settle_time=settle_time,
             blind_point=blind_point,
-            blind_delay=blind_delay
+            blind_delay=blind_delay,
         )
+
     def get_order_status(self, time_out=5):
         boxes = [None, self.box_of_screen(0.748, 0.768, 0.769, 0.787)]
         features = [fL.down_order_button, fL.up_order_button]
@@ -442,11 +550,14 @@ class RuntimeMixin:
             for feature in features:
                 for box in boxes:
                     if result := self.find_feature(feature_name=feature, box=box):
-                        return result, "down" if feature == fL.down_order_button else "up"
+                        return result, (
+                            "down" if feature == fL.down_order_button else "up"
+                        )
 
             self.sleep(0.05)
 
         return None, None
+
     def switch_order(self, target_order="up"):
         switch_order, status = self.get_order_status()
         if not status:
