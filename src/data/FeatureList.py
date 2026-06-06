@@ -4,8 +4,10 @@ from enum import Enum
 class FeatureList(str, Enum):
     AP_credit_icon = 'AP_credit_icon'
     add_button = 'add_button'
+    align_close_button = 'align_close_button'
     arena_checkout = 'arena_checkout'
     arena_enter = 'arena_enter'
+    arena_no_1 = 'arena_no_1'
     arena_ok = 'arena_ok'
     arena_star_checkout = 'arena_star_checkout'
     back = 'back'

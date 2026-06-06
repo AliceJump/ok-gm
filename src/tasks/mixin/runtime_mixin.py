@@ -423,7 +423,7 @@ class RuntimeMixin:
                     click_after_delay=0.5, settle_time=0,
                     blind_point=None, blind_delay=1):
         return self.click_feature(
-            feature_name=fL.close_button,
+            feature_name=[fL.close_button, fL.align_close_button],
             preferred_box=self.box_of_screen(0.146, 0.884, 0.220, 0.930),
             time_out=time_out,
             after_sleep=after_sleep,
