@@ -12,7 +12,7 @@
 <p>
 An image-recognition-based automation tool for Gakuen Idolmaster, with background mode support, developed based on <a href="https://github.com/ok-oldking/ok-script">ok-script</a>.
 <br />
-一个基于图像识别的终末地自动化程序，部分功能支持后台运行，基于 <a href="https://github.com/ok-oldking/ok-script">ok-script</a> 开发。
+一个基于图像识别的学马仕自动化程序，部分功能支持后台运行，基于 <a href="https://github.com/ok-oldking/ok-script">ok-script</a> 开发。
 </p>
 
 <p><i>Operates by simulating Windows user interactions. No memory reading, no file modification.</i></p>
