@@ -6,7 +6,7 @@ class DailyCreditCollect:
         if not self.wait_click_feature(feature=fL.credit_enter, raise_if_not_found=False, click_after_delay=0.5):
             self.mark_task_failure("找不到收米的地方")
             return False
-        if not self.click_close(click_after_delay=0.5):
+        if not self.click_close():
             self.mark_task_failure("找不到关闭按钮")
             return False
         self.log_info("收完了!")

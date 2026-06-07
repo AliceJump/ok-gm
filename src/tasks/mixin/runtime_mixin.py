@@ -503,20 +503,18 @@ class RuntimeMixin:
         row=ScreenRow.MIDDLE,
         time_out=5,
         after_sleep=0,
-        click_after_delay=0.5,
-        settle_time=0,
         blind_point=None,
-        blind_delay=1,
+        blind_delay=0,
+        click_after_delay=0.5,
     ):
         return self.click_feature(
             feature_name=fL.ok_button,
             boxes=self.get_ok_or_close_boxes(row=row),
             time_out=time_out,
             after_sleep=after_sleep,
-            click_after_delay=click_after_delay,
-            settle_time=settle_time,
             blind_point=blind_point,
             blind_delay=blind_delay,
+            click_after_delay=click_after_delay,
         )
 
     def click_close(
@@ -524,20 +522,18 @@ class RuntimeMixin:
         row=ScreenRow.MIDDLE,
         time_out=5,
         after_sleep=0,
-        click_after_delay=0.5,
-        settle_time=0,
         blind_point=None,
-        blind_delay=1,
+        blind_delay=0,
+        click_after_delay=0.5,
     ):
         return self.click_feature(
             feature_name=[fL.close_button, fL.align_close_button],
             boxes=self.get_ok_or_close_boxes(row=row),
             time_out=time_out,
             after_sleep=after_sleep,
-            click_after_delay=click_after_delay,
-            settle_time=settle_time,
             blind_point=blind_point,
             blind_delay=blind_delay,
+            click_after_delay=click_after_delay,
         )
 
     def get_order_status(self, time_out=5):

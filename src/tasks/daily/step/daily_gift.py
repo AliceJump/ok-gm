@@ -9,5 +9,5 @@ class DailyGift:
         if not self.wait_click_feature(feature=fL.next_step, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.344, 0.832, 0.404, 0.863)):
             self.log_info("没有下一步了，可能小礼物已经领完了")
         else:
-            self.click_close(time_out=2, click_after_delay=0.5)
+            self.click_close(time_out=2)
         return True
