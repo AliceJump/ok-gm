@@ -1,7 +1,7 @@
 import re
 from src.data.FeatureList import FeatureList as fL
-
-class DailyCoinRandom:
+from src.tasks.BaseGMTask import BaseGMTask
+class DailyCoinRandom(BaseGMTask):
     def go_coin_random(self):
         if getattr(self, "all_ok", False):
             self.log_info("配置里设置了all_ok，跳过小偶像硬币抽奖")

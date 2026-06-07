@@ -549,6 +549,9 @@ class RuntimeMixin:
         blind_point=None,
         blind_delay=0,
         click_after_delay=0.5,
+        verify_disappear=True,
+        verify_timeout=0.5,
+        max_click_retry=3
     ):
         return self.click_feature(
             feature_name=fL.ok_button,
@@ -558,6 +561,9 @@ class RuntimeMixin:
             blind_point=blind_point,
             blind_delay=blind_delay,
             click_after_delay=click_after_delay,
+            verify_disappear=verify_disappear,
+            verify_timeout=verify_timeout,
+            max_click_retry=max_click_retry
         )
 
     def click_close(
@@ -568,6 +574,9 @@ class RuntimeMixin:
         blind_point=None,
         blind_delay=0,
         click_after_delay=0.5,
+        verify_disappear=True,
+        verify_timeout=0.5,
+        max_click_retry=3,
     ):
         return self.click_feature(
             feature_name=[fL.close_button, fL.align_close_button],
@@ -577,6 +586,9 @@ class RuntimeMixin:
             blind_point=blind_point,
             blind_delay=blind_delay,
             click_after_delay=click_after_delay,
+            verify_disappear=verify_disappear,
+            verify_timeout=verify_timeout,
+            max_click_retry=max_click_retry
         )
 
     def click_next(
@@ -587,6 +599,9 @@ class RuntimeMixin:
         blind_point=None,
         blind_delay=0,
         click_after_delay=0.5,
+        verify_disappear=True,
+        verify_timeout=0.5,
+        max_click_retry=3
     ):
         return self.click_feature(
             feature_name=fL.next_step,
@@ -596,20 +611,24 @@ class RuntimeMixin:
             blind_point=blind_point,
             blind_delay=blind_delay,
             click_after_delay=click_after_delay,
+            verify_disappear=verify_disappear,
+            verify_timeout=verify_timeout,
+            max_click_retry=max_click_retry
         )
 
     def get_order_status(self, time_out=5):
-        boxes = [None, self.box_of_screen(0.748, 0.768, 0.769, 0.787)]
-        features = [fL.down_order_button, fL.up_order_button]
+        boxes = [self.box_of_screen(0.746, 0.767, 0.787, 0.790), self.box_of_screen(0.885, 0.767, 0.935, 0.790)]
+        features = [fL.down_order_button, fL.up_order_button_dark, fL.up_order_button, fL.down_order_button_dark]
+        
 
         start_time = time.time()
 
         while time.time() - start_time < time_out:
             for feature in features:
                 for box in boxes:
-                    if result := self.find_feature(feature_name=feature, box=box):
+                    if result := self.find_feature(feature_name=feature, box=box, threshold=0.7):
                         return result, (
-                            "down" if feature == fL.down_order_button else "up"
+                            "down" if fL.down_order_button in feature else "up"
                         )
 
             self.sleep(0.05)
@@ -626,8 +645,7 @@ class RuntimeMixin:
             self.log_info(f"当前已经是{target_order}序了，无需切换")
             return True
         else:
-            self.sleep(0.5)
-            self.click(switch_order, after_sleep=0.5)
+            self.click(switch_order, after_sleep=1)
             _, new_status = self.get_order_status()
             if new_status and new_status == target_order:
                 self.log_info(f"成功切换到{target_order}序")

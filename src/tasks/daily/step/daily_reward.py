@@ -1,5 +1,6 @@
 from src.data.FeatureList import FeatureList as fL
-class DailyReward:
+from src.tasks.BaseGMTask import BaseGMTask
+class DailyReward(BaseGMTask):
     def go_reward(self):
         self.log_info("开始领奖励...")
         self.wait_click_feature(feature=fL.task_enter, raise_if_not_found=False, click_after_delay=0.5)
@@ -16,7 +17,7 @@ class DailyReward:
             self.click(split, after_sleep=0.5)
             self.wait_ui_stable()
             times += 1
-            self.wait_click_feature(feature=fL.next_step, vertical_variance=0.1, horizontal_variance=0.1, raise_if_not_found=False, click_after_delay=0.5)
+            self.click_next(row=self.ScreenRow.TOP, verify_disappear=False)
             for i in range(2):
                 if not self.click_close(after_sleep=0.5, time_out=4*(i+1)):
                     break

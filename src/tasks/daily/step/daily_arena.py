@@ -1,7 +1,8 @@
 import time
 import re
 from src.data.FeatureList import FeatureList as fL
-class DailyArena:
+from src.tasks.BaseGMTask import BaseGMTask
+class DailyArena(BaseGMTask):
     def go_arena(self):
         if not self.enter_arena():
             return False
@@ -55,7 +56,7 @@ class DailyArena:
         self.wait_until_feature(fL.arena_no_1, fL.skip_pk, box=self.box_of_screen(0.059, 0.241, 0.935, 0.275), allow_unrecognized_click=True, skip_target_check_after_action=True)
 
         for i in range(2):
-            if not self.wait_click_feature(feature=fL.next_step, raise_if_not_found=False, click_after_delay=i+1, box=self.box_of_screen(0.352, 0.892, 0.398, 0.921)):
+            if not self.click_next(row=self.ScreenRow.MIDDLE):
                 self.mark_task_failure("找不到下一步按钮")
                 return False
         if not self.click_close(time_out=4):

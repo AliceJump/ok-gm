@@ -1,5 +1,6 @@
 from src.data.FeatureList import FeatureList as fL
-class DailyUpCard:
+from src.tasks.BaseGMTask import BaseGMTask
+class DailyUpCard(BaseGMTask):
     def go_up_card(self):
         self.log_info("开始升级支援卡...")
         if not self.wait_click_feature(feature=fL.switch_baby_page, raise_if_not_found=False, click_after_delay=0.5):
@@ -15,7 +16,7 @@ class DailyUpCard:
         if not self.wait_click_feature(feature=fL.card_level_up, time_out=4, raise_if_not_found=False, click_after_delay=0.5):
             self.mark_task_failure("找不到升级按钮")
             return False
-        if not self.wait_click_feature(feature=fL.next_step, time_out=4, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.550, 0.892, 0.598, 0.921)):
+        if not self.click_next(row=self.ScreenRow.MIDDLE):
             self.mark_task_failure("找不到下一步按钮")
             return False
         return True

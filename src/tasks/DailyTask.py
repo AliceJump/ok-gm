@@ -20,9 +20,8 @@ from src.data.FeatureList import FeatureList as fL
 class DailyTask(
     DailyArena, DailyGift, DailyWork, 
     DailyCreditCollect, DailyShop, DailyUpCard, 
-    DailyReward, DailyCoinRandom,
-    ShopMixin, 
-    BaseGMTask):
+    DailyReward, DailyCoinRandom
+    ):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

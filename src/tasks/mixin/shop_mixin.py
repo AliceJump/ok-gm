@@ -1,6 +1,6 @@
 class ShopMixin:
     
-    def buy_goods(self, need_buy_goods=None, need_buy_goods_feature=None):
+    def buy_goods(self, need_buy_goods=None, need_buy_goods_feature=None, retry_times=1):
         if need_buy_goods is None:
             need_buy_goods = []
         goods_area = self.box_of_screen(0.026, 0.242, 0.978, 0.760)
@@ -29,10 +29,12 @@ class ShopMixin:
         )
 
         for good in goods:
-            if not self.click(good, after_sleep=0.5):
-                self.log_info(f"点击{good}失败")
-                continue
-
-            if not self.click_ok(after_sleep=0.5):
-                self.mark_task_failure(f"找不到{good}的购买确认按钮")
+            retry_time = retry_times
+            while retry_time > 0:
+                self.click(good)
+                if self.click_ok(after_sleep=0.7, time_out=2):
+                    break
+                retry_time -= 1
+            if retry_time == 0:
+                self.mark_task_failure(f"购买{good}失败")
         return True
