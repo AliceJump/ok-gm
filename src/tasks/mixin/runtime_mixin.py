@@ -18,11 +18,16 @@ from src.data.FeatureList import FeatureList as fL
 
 
 class ScreenRow(Enum):
+    """
+    定义屏幕行枚举，表示界面上不同垂直位置的区域划分。
+    """
+    TOP = "top"
     MIDDLE = "middle"
     BOTTOM = "bottom"
 
 
 BUTTON_ROW_Y = {
+    ScreenRow.TOP: (0.814, 0.880),
     ScreenRow.MIDDLE: (0.880, 0.930),
     ScreenRow.BOTTOM: (0.929, 0.969),
 }
@@ -36,13 +41,14 @@ BUTTON_COL_X = [
 
 class RuntimeMixin:
     @property
-    def ok_or_close_boxes(self):
-        return self.get_ok_or_close_boxes()
+    def button_boxs(self):
+        return self.get_button_boxs()
 
-    def get_ok_or_close_boxes(self, row=ScreenRow.MIDDLE):
+    def get_button_boxs(self, row=ScreenRow.MIDDLE):
         y1, y2 = BUTTON_ROW_Y[row]
 
         return [self.box_of_screen(x1, y1, x2, y2) for x1, x2 in BUTTON_COL_X]
+    
 
     def wait_ui_stable(
         self,
@@ -462,6 +468,9 @@ class RuntimeMixin:
         settle_time=0,
         blind_point=None,
         blind_delay=1,
+        verify_disappear=True,
+        verify_timeout=0.5,
+        max_click_retry=3
     ):
         boxes = [None] + (boxes or [])
 
@@ -479,14 +488,28 @@ class RuntimeMixin:
                 )
 
                 if result and self.feature_stable(feature_name, box, settle_time):
-                    self.sleep(click_after_delay)
+                    retry_count = 0
 
-                    self.screenshot(
-                        name=f"样本收集_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                    )
+                    while retry_count < max_click_retry:
+                        self.sleep(click_after_delay)
 
-                    self.click(result, after_sleep=after_sleep)
-                    return True
+                        self.click(result, after_sleep=after_sleep)
+
+                        if not verify_disappear:
+                            return True
+
+                        if self.wait_feature_disappear(
+                            feature_name,
+                            box,
+                            verify_timeout,
+                        ):
+                            return True
+
+                        self.log_warning(
+                            f"{feature_name} 点击后未消失，重试 {retry_count + 1}/{max_click_retry}"
+                        )
+
+                        retry_count += 1
 
             if blind_point and (time.time() - last_blind_time >= blind_delay):
                 self.click(
@@ -497,7 +520,27 @@ class RuntimeMixin:
                 last_blind_time = time.time()
 
         return False
+    
+    def wait_feature_disappear(
+        self,
+        feature_name,
+        box=None,
+        timeout=1,
+    ):
+        start = time.time()
 
+        while time.time() - start < timeout:
+            frame = self.next_frame()
+
+            if not self.find_feature(
+                feature_name=feature_name,
+                box=box,
+                frame=frame,
+            ):
+                return True
+
+        return False
+    
     def click_ok(
         self,
         row=ScreenRow.MIDDLE,
@@ -509,7 +552,7 @@ class RuntimeMixin:
     ):
         return self.click_feature(
             feature_name=fL.ok_button,
-            boxes=self.get_ok_or_close_boxes(row=row),
+            boxes=self.get_button_boxs(row=row),
             time_out=time_out,
             after_sleep=after_sleep,
             blind_point=blind_point,
@@ -528,7 +571,26 @@ class RuntimeMixin:
     ):
         return self.click_feature(
             feature_name=[fL.close_button, fL.align_close_button],
-            boxes=self.get_ok_or_close_boxes(row=row),
+            boxes=self.get_button_boxs(row=row),
+            time_out=time_out,
+            after_sleep=after_sleep,
+            blind_point=blind_point,
+            blind_delay=blind_delay,
+            click_after_delay=click_after_delay,
+        )
+
+    def click_next(
+        self,
+        row=ScreenRow.MIDDLE,
+        time_out=5,
+        after_sleep=0,
+        blind_point=None,
+        blind_delay=0,
+        click_after_delay=0.5,
+    ):
+        return self.click_feature(
+            feature_name=fL.next_step,
+            boxes=self.get_button_boxs(row=row),
             time_out=time_out,
             after_sleep=after_sleep,
             blind_point=blind_point,

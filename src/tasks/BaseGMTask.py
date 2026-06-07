@@ -1,7 +1,7 @@
 import re
 
 from ok import BaseTask
-from src.tasks.mixin.runtime_mixin import RuntimeMixin
+from src.tasks.mixin.runtime_mixin import RuntimeMixin, ScreenRow
 from src.tasks.mixin.login_mixin import LoginMixin
 from src.tasks.mixin.account_override_mixin import AccountOverrideMixin
 class BaseGMTask(RuntimeMixin, LoginMixin, AccountOverrideMixin, BaseTask):
@@ -9,6 +9,7 @@ class BaseGMTask(RuntimeMixin, LoginMixin, AccountOverrideMixin, BaseTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._logged_in = False
+        self.ScreenRow = ScreenRow
 
     def iter_multi_account_context(self, repeat_times: int = 1, empty_accounts_message: str | None = None,
                                    account_log_suffix: str = "", allow_multi_account: bool = True):
