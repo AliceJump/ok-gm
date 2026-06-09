@@ -60,7 +60,7 @@ class DailyArena(BaseGMTask):
                 self.mark_task_failure("找不到下一步按钮")
                 return False
         if not self.click_close(time_out=4):
-            self.mark_task_failure("找不到关闭按钮,可能本次没有显式奖励")
+            self.log_info("找不到关闭按钮,可能本次没有显式奖励")
         return True
     def get_arena_ticket_number(self):
         result = self.wait_ocr(match=re.compile(r'\d+/\d+'), time_out=5, box=self.box_of_screen(0.780, 0.013, 0.904, 0.051))

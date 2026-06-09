@@ -13,10 +13,11 @@ class DailyWork(BaseGMTask):
         work_bool = False
         while self.wait_click_feature(feature=fL.work_select_enter, time_out=4, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.226, 0.468, 0.769, 0.527)):
             self.log_info("找小偶像干活...")
+            self.wait_ui_stable(box=self.box_of_screen(0.028, 0.556, 0.991, 0.804))   
             if not self.wait_click_feature(feature=fL.very_good_icon, time_out=6, box=self.box_of_screen(0.028, 0.556, 0.991, 0.804), raise_if_not_found=False, click_after_delay=0.5):
-                self.log_info("未找到特爽角色，不干了")
+                self.log_info("未找到特爽角色")
             for i in range(2):
-                if self.click_next(row=self.ScreenRow.TOP):
+                if self.click_next(row=self.ScreenRow.TOP, verify_disappear=bool(i)):
                     self.log_info(f"第{i+1}次点击下一步")
                 if i==0:
                     self.click_ok(time_out=2)

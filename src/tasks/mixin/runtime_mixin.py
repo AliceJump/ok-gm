@@ -233,8 +233,8 @@ class RuntimeMixin:
                 if self.find_feature(feature_name=target_feature, box=box):
                     self.log_info(f"成功找到目标: {target_feature}")
                     return True
-
-            self.sleep(loop_sleep)
+            if clicked:
+                self.sleep(loop_sleep)
 
     def scroll(self, x: int, y: int, count: int) -> None:
         """按屏幕绝对像素坐标滚轮。
