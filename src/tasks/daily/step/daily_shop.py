@@ -5,10 +5,10 @@ from src.tasks.mixin.shop_mixin import ShopMixin
 class DailyShop(BaseGMTask, ShopMixin):
     def go_shop(self):
         self.log_info("开始买东西...")
-        if not self.wait_click_feature(feature=fL.shop_enter, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.shop_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到商店的门")
             return False
-        if not self.wait_click_feature(feature=fL.daily_shop_enter, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.daily_shop_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到日常商店的门")
             return False
         self.wait_ui_stable()

@@ -25,13 +25,13 @@ class DailyArena(BaseGMTask):
         if not self.wait_click_feature(feature=fL.switch_arena_page, raise_if_not_found=False, click_after_delay=0.5):
             self.mark_task_failure("找不到切换到竞技场的按钮")
             return False
-        if not self.wait_click_feature(feature=fL.arena_enter, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.arena_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到进入竞技场的按钮")
             return False
         self.log_info("开干了!")
         return True
     def check_arena_pop_up(self):
-        if self.wait_click_feature(feature=fL.arena_checkout, settle_time=1, time_out=4, raise_if_not_found=False, click_after_delay=0.5):
+        if self.click_feature(feature_name=fL.arena_checkout, settle_time=1, time_out=4, click_after_delay=0.5):
             self.log_info("竞技场结算界面弹出来了，可能是上次竞技场结算")
             if result:= self.wait_feature(feature=fL.arena_star_checkout, raise_if_not_found=False):
                 self.click(result.x, result.y+0.2*self.height)
@@ -42,11 +42,11 @@ class DailyArena(BaseGMTask):
         else:
             return True
     def pk_arena(self):
-        if not self.wait_click_feature(feature=fL.first_opponent, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.first_opponent, click_after_delay=0.5):
             self.mark_task_failure("找不到第一个对手")
             return False
         self.log_info("开干了!")
-        if not self.wait_click_feature(feature=fL.start_pk, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.start_pk, click_after_delay=0.5):
             self.mark_task_failure("找不到开始的按钮")
             return False
         if not self.wait_click_feature(feature=fL.skip_pk, raise_if_not_found=False, click_after_delay=0.5, time_out=30):

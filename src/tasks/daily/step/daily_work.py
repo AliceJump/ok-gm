@@ -3,7 +3,7 @@ from src.tasks.BaseGMTask import BaseGMTask
 class DailyWork(BaseGMTask):
     def go_work(self):
         self.log_info("开始找小偶像干活...")
-        if not self.wait_click_feature(feature=fL.work_enter, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.work_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到干活的门")
             return False
         if self.click_ok(time_out=8, blind_point=(0.504, 0.042), after_sleep=2):
@@ -11,7 +11,7 @@ class DailyWork(BaseGMTask):
         self.wait_ui_stable(box=self.box_of_screen(0.044, 0.433, 0.943, 0.503))
         times = 0
         work_bool = False
-        while self.wait_click_feature(feature=fL.work_select_enter, time_out=4, raise_if_not_found=False, click_after_delay=0.5, box=self.box_of_screen(0.226, 0.468, 0.769, 0.527)):
+        while self.click_feature(feature_name=fL.work_select_enter, time_out=4, click_after_delay=0.5, boxes=[self.box_of_screen(0.226, 0.468, 0.769, 0.527)]):
             self.log_info("找小偶像干活...")
             self.wait_ui_stable(box=self.box_of_screen(0.028, 0.556, 0.991, 0.804))   
             if not self.wait_click_feature(feature=fL.very_good_icon, time_out=6, box=self.box_of_screen(0.028, 0.556, 0.991, 0.804), raise_if_not_found=False, click_after_delay=0.5):

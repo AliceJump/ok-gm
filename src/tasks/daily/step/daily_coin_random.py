@@ -25,17 +25,17 @@ class DailyCoinRandom(BaseGMTask):
         return True
     def go_coin_page(self):
         self.log_info("开始找小偶像硬币抽奖...")
-        if not self.wait_click_feature(feature=fL.shop_enter, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.shop_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到小偶像硬币抽奖的门")
             return False
-        if not self.wait_click_feature(feature=fL.coin_random_enter, raise_if_not_found=False, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.coin_random_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到小偶像硬币抽奖的门")
             return False
         self.log_info("开干了!")
         return True
     def find_and_click_with_enough(self):
         for _ in range(2):
-            results = self.find_feature(feature_name=fL.info_click, box=self.box_of_screen(0.876, 0.248, 0.935, 0.863))
+            results = self.find_feature(feature_name=fL.info_click, box=self.box_of_screen(0.876, 0.248, 0.935, 0.863), threshold=0.7)
             for result in results:
                 num_area = self.box_of_screen(x=result.x/self.width-(0.878-0.376), y=result.y/self.height-(0.249-0.544), width=0.624-0.378, height=0.572-0.546)
                 left_num = self.ocr(match=re.compile(r"\d+"), box=num_area)
@@ -59,7 +59,7 @@ class DailyCoinRandom(BaseGMTask):
             self.mark_task_failure("未找到减号按钮")
             return False
         self.click(subtraction.x+int((0.35-0.15)*self.width), subtraction.y+subtraction.height//2, after_sleep=0.5)
-        if not self.wait_click_feature(feature=fL.add_button, time_out=4, raise_if_not_found=False, click_after_delay=0.5, after_sleep=0.5):
+        if not self.click_feature(feature_name=fL.add_button, time_out=4, click_after_delay=0.5, after_sleep=0.5):
             self.mark_task_failure("未找到加号按钮")
             return False
         return True
