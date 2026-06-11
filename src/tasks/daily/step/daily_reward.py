@@ -3,8 +3,9 @@ from src.tasks.BaseGMTask import BaseGMTask
 class DailyReward(BaseGMTask):
     def go_reward(self):
         self.log_info("开始领奖励...")
-        self.wait_click_feature(feature=fL.task_enter, raise_if_not_found=False, click_after_delay=0.5)
+        self.click_feature(feature_name=fL.task_enter, click_after_delay=0.5)
         self.wait_ui_stable()
+        self.wait_feature(feature=fL.split_icon, box=self.box_of_screen(0.037, 0.740, 0.961, 0.795), raise_if_not_found=False)
         splits = self.find_feature(feature_name=[fL.split_icon], box=self.box_of_screen(0.037, 0.740, 0.961, 0.795))
         if splits:
             self.log_info(f"找到了{len(splits)}个分割线")

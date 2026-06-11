@@ -1,10 +1,13 @@
 import os
 import re
+import sys
 import time
 import subprocess
 import psutil
+import pywintypes
 import win32gui
 import win32process
+import ok.util.window as ok_window
 
 from pathlib import Path
 
@@ -14,6 +17,43 @@ from qfluentwidgets import FluentIcon
 
 GAME_EXE = "gakumas.exe"
 GAME_HWND_CLASS = "UnityWndClass"
+
+
+def _is_invalid_hwnd_error(error):
+    return (
+        getattr(error, "winerror", None) == 1400
+        or (getattr(error, "args", None) and error.args[0] == 1400)
+    )
+
+
+def _install_safe_find_hwnd():
+    original_find_hwnd = getattr(
+        ok_window.find_hwnd,
+        "_ok_gm_original_find_hwnd",
+        ok_window.find_hwnd
+    )
+
+    if getattr(ok_window.find_hwnd, "_ok_gm_safe_find_hwnd", False):
+        safe_find_hwnd = ok_window.find_hwnd
+    else:
+        def safe_find_hwnd(*args, **kwargs):
+            try:
+                return original_find_hwnd(*args, **kwargs)
+            except pywintypes.error as error:
+                if _is_invalid_hwnd_error(error):
+                    return None, 0, None, 0, 0, 0, 0, []
+                raise
+
+        safe_find_hwnd._ok_gm_safe_find_hwnd = True
+        safe_find_hwnd._ok_gm_original_find_hwnd = original_find_hwnd
+        ok_window.find_hwnd = safe_find_hwnd
+
+    hwnd_window = sys.modules.get("ok.device.capture_methods.hwnd_window")
+    if hwnd_window is not None:
+        hwnd_window.find_hwnd = safe_find_hwnd
+
+
+_install_safe_find_hwnd()
 
 
 class LauncherTask(BaseGMTask):
