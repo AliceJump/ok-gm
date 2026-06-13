@@ -8,7 +8,7 @@ class DailyShop(BaseGMTask, ShopMixin):
         if not self.click_feature(feature_name=fL.shop_enter, click_after_delay=0.5):
             self.mark_task_failure("找不到商店的门")
             return False
-        if not self.click_feature(feature_name=fL.daily_shop_enter, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.daily_shop_enter, verify_timeout=1, click_after_delay=0.5, after_sleep=2):
             self.mark_task_failure("找不到日常商店的门")
             return False
         self.wait_ui_stable()
