@@ -102,7 +102,7 @@ def create_daily_summary_report(directory: Path, summary_info: dict, keep_days: 
         创建的文件路径
     """
     # 在指定目录下创建 "日常执行情况" 子目录
-    target_dir = directory / "日常执行情况"
+    target_dir = directory / "日常执行情况" / "ok-gm"
     target_dir.mkdir(parents=True, exist_ok=True)
 
     # 删除超过指定天数的旧汇总文件
