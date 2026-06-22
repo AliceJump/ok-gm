@@ -25,7 +25,7 @@ class DailyCoinRandom(BaseGMTask):
         return True
     def go_coin_page(self):
         self.log_info("开始找小偶像硬币抽奖...")
-        if not self.click_feature(feature_name=fL.shop_enter, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.shop_enter, click_after_delay=0.5, verify_timeout=2):
             self.mark_task_failure("找不到小偶像硬币抽奖的门")
             return False
         if not self.click_feature(feature_name=fL.coin_random_enter, click_after_delay=0.5):

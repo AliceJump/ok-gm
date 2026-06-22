@@ -6,7 +6,7 @@ class DailyUpCard(BaseGMTask):
         if not self.wait_click_feature(feature=fL.switch_baby_page, raise_if_not_found=False, click_after_delay=0.5):
             self.mark_task_failure("找不到升级支援卡的门")
             return False
-        if not self.click_feature(feature_name=fL.support_card_enter, time_out=4, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.support_card_enter, time_out=4, click_after_delay=0.5, verify_timeout=2):
             self.mark_task_failure("找不到升级支援卡界面的进入按钮")
             return False
         if self.switch_order(target_order="up"):

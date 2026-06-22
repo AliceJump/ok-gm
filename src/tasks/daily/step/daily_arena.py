@@ -25,7 +25,7 @@ class DailyArena(BaseGMTask):
         if not self.wait_click_feature(feature=fL.switch_arena_page, raise_if_not_found=False, click_after_delay=0.5):
             self.mark_task_failure("找不到切换到竞技场的按钮")
             return False
-        if not self.click_feature(feature_name=fL.arena_enter, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.arena_enter, click_after_delay=0.5, verify_timeout=2):
             self.mark_task_failure("找不到进入竞技场的按钮")
             return False
         self.log_info("开干了!")

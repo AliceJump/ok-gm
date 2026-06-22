@@ -3,7 +3,7 @@ from src.tasks.BaseGMTask import BaseGMTask
 class DailyCreditCollect(BaseGMTask):
     def go_credit_collect(self):
         self.log_info("开始收米...")
-        if not self.click_feature(feature_name=fL.credit_enter, click_after_delay=0.5):
+        if not self.click_feature(feature_name=fL.credit_enter, click_after_delay=0.5, verify_timeout=2):
             self.mark_task_failure("找不到收米的地方")
             return False
         if not self.click_close():

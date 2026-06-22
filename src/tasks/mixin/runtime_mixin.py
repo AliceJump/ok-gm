@@ -416,7 +416,6 @@ class RuntimeMixin:
                     fL.skip_dialog,
                     fL.process_back_home,
                     fL.hall_back_home,
-                    fL.back,
                 ],
                 time_out=2,
                 raise_if_not_found=False,

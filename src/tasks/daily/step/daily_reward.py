@@ -3,7 +3,7 @@ from src.tasks.BaseGMTask import BaseGMTask
 class DailyReward(BaseGMTask):
     def go_reward(self):
         self.log_info("开始领奖励...")
-        self.click_feature(feature_name=fL.task_enter, click_after_delay=0.5)
+        self.click_feature(feature_name=fL.task_enter, click_after_delay=0.5, verify_timeout=2)
         self.wait_ui_stable()
         self.wait_feature(feature=fL.split_icon, box=self.box_of_screen(0.037, 0.740, 0.961, 0.795), raise_if_not_found=False)
         splits = self.find_feature(feature_name=[fL.split_icon], box=self.box_of_screen(0.037, 0.740, 0.961, 0.795))
