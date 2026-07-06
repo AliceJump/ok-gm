@@ -34,6 +34,7 @@ class ShopMixin:
                 self.click(good)
                 if self.click_ok(after_sleep=1, time_out=2):
                     break
+                self.click_close(time_out=1, after_sleep=0.5)
                 retry_time -= 1
             if retry_time == 0:
                 self.mark_task_failure(f"购买{good}失败")

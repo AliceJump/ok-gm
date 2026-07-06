@@ -409,10 +409,8 @@ class RuntimeMixin:
 
         if esc:
             # self.back(after_sleep=1.5)
-            self.wait_click_feature(
+            if not self.wait_click_feature(
                 feature=[
-                    fL.close_button,
-                    fL.align_close_button,
                     fL.skip_dialog,
                     fL.process_back_home,
                     fL.hall_back_home,
@@ -422,7 +420,8 @@ class RuntimeMixin:
                 click_after_delay=0.5,
                 horizontal_variance=0.1,
                 vertical_variance=0.1,
-            )
+            ):
+                self.click_close(row=ScreenRow.MIDDLE, time_out=1, after_sleep=0.5)
 
     def in_main(self):
         """
