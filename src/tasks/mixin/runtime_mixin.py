@@ -421,7 +421,10 @@ class RuntimeMixin:
                 horizontal_variance=0.1,
                 vertical_variance=0.1,
             ):
+                if (not self._logged_in) and self.click_ok(row=ScreenRow.MIDDLE, time_out=1, after_sleep=0.5):
+                    return False
                 self.click_close(row=ScreenRow.MIDDLE, time_out=1, after_sleep=0.5)
+        return False
 
     def in_main(self):
         """

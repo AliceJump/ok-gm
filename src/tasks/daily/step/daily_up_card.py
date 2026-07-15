@@ -16,6 +16,7 @@ class DailyUpCard(BaseGMTask):
         if not self.click_feature(feature_name=fL.card_level_up, time_out=4, click_after_delay=0.5):
             self.mark_task_failure("找不到升级按钮")
             return False
+        self.wait_click_feature(feature=fL.card_up_button, time_out=1, after_sleep=0.5)
         if not self.click_next(row=self.ScreenRow.MIDDLE):
             self.mark_task_failure("找不到下一步按钮")
             return False

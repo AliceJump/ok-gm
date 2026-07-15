@@ -185,6 +185,12 @@
             "file_name": "images/5.png",
             "width": 1081,
             "height": 1921
+        },
+        {
+            "id": 40,
+            "file_name": "images/0.png",
+            "width": 1080,
+            "height": 1920
         }
     ],
     "annotations": [
@@ -785,6 +791,19 @@
             ],
             "area": 448,
             "iscrowd": 0
+        },
+        {
+            "id": 47,
+            "image_id": 40,
+            "category_id": 47,
+            "bbox": [
+                832,
+                1427,
+                37,
+                47
+            ],
+            "area": 1739,
+            "iscrowd": 0
         }
     ],
     "categories": [
@@ -1016,6 +1035,11 @@
         {
             "id": 46,
             "name": "down_order_button",
+            "supercategory": ""
+        },
+        {
+            "id": 47,
+            "name": "card_up_button",
             "supercategory": ""
         }
     ]

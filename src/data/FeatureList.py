@@ -12,6 +12,7 @@ class FeatureList(str, Enum):
     arena_star_checkout = 'arena_star_checkout'
     back = 'back'
     card_level_up = 'card_level_up'
+    card_up_button = 'card_up_button'
     card_up_credit = 'card_up_credit'
     char_piece = 'char_piece'
     close_button = 'close_button'
