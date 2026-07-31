@@ -56,7 +56,17 @@ jobs:
       - name: Run tests
         timeout-minutes: 5
         run: |
-          python -u -m unittest discover -s tests -p "Test*.py" -v
+          $testFiles = @(Get-ChildItem -Path ".\tests" -Filter "Test*.py" -File)
+          if ($testFiles.Count -eq 0) {
+            Write-Host "No tests found; skipping."
+            exit 0
+          }
+          foreach ($testFile in $testFiles) {
+            python -u -m unittest $testFile.FullName
+            if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+            }
+          }
 
   sync:
     needs: test
