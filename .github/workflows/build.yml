@@ -172,10 +172,18 @@ jobs:
         id: build-app
         uses: ok-oldking/pyappify-action@master #使用pyappify打包exe
 
+      - name: Add version to build filenames
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          Get-ChildItem -Path pyappify_dist -File | ForEach-Object {
+            Rename-Item -LiteralPath $_.FullName -NewName "$($_.BaseName)-$version$($_.Extension)"
+          }
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pyappify_dist
+          name: pyappify_dist-${{ github.ref_name }}
           path: pyappify_dist/*
 
   release:
@@ -188,7 +196,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: pyappify_dist
+          name: pyappify_dist-${{ github.ref_name }}
           path: pyappify_dist
 
       - name: Release
@@ -199,8 +207,8 @@ jobs:
             ###  更新日志 ${{ needs.sync.outputs.start_tag }} -> ${{ needs.sync.outputs.end_tag }}:
               ${{ needs.sync.outputs.changes_with_asterisk }}
             ### 下载包说明
-              * [ok-GM-win32-China-setup.exe](https://github.com/alicejump/ok-GM/releases/download/${{ github.ref_name }}/ok-GM-win32-China-setup.exe) 完整安装包, 更新使用阿里云+腾讯CNB.
-              * [ok-GM-win32-Global-setup.exe](https://github.com/alicejump/ok-GM/releases/download/${{ github.ref_name }}/ok-GM-win32-Global-setup.exe) full package with dependencies, using GitHub and PyPi as update source
+              * [ok-GM-win32-China-setup-${{ github.ref_name }}.exe](https://github.com/alicejump/ok-GM/releases/download/${{ github.ref_name }}/ok-GM-win32-China-setup-${{ github.ref_name }}.exe) 完整安装包, 更新使用阿里云+腾讯CNB.
+              * [ok-GM-win32-Global-setup-${{ github.ref_name }}.exe](https://github.com/alicejump/ok-GM/releases/download/${{ github.ref_name }}/ok-GM-win32-Global-setup-${{ github.ref_name }}.exe) full package with dependencies, using GitHub and PyPi as update source
           files: pyappify_dist/**
 
   trigger_mirrorchyan:
