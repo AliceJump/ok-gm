@@ -344,15 +344,7 @@ class RuntimeMixin:
                 self._logged_in = True
                 return True
             elif self.find_one(fL.login_click):
-                run_at_window_pos(
-                    self.hwnd.hwnd,
-                    super().click,
-                    self.width // 2,
-                    self.height // 2,
-                    1,
-                    0.5,
-                    0.5,
-                )
+                self.click(0.5, 0.5)
                 return False
             elif close := (
                 self.find_one(
@@ -383,9 +375,6 @@ class RuntimeMixin:
         """
 
         self.next_frame()
-
-        if not self._logged_in and need_active:
-            self.active_and_send_mouse_delta(activate=True, only_activate=True)
 
         # 已进入世界
         if self.wait_until(self.in_main, time_out=1):

@@ -3,7 +3,7 @@ import os
 import webbrowser
 from pathlib import Path
 from qfluentwidgets import FluentIcon
-from src.tasks.daily.finally_file import create_daily_summary_report
+from src.tasks.daily.finally_file import create_task_summary_report
 from src.tasks.BaseGMTask import BaseGMTask
 from src.tasks.daily.daily_task_runner import DailyTaskRunner
 from src.tasks.daily.step.daily_arena import DailyArena
@@ -81,7 +81,7 @@ class DailyTask(
                 return True
 
             summary_info = self.daily_runner.final_summary
-            summary_path = create_daily_summary_report(target_directory, summary_info)
+            summary_path = create_task_summary_report(self, target_directory, summary_info)
 
             # 立即用系统默认程序打开临时汇总文件
             self._open_local_path_with_default_app(summary_path)
