@@ -6,6 +6,23 @@ from src.interaction.EfInteraction import EfInteraction
 version = "dev"
 #不需要修改version, Github Action打包会自动修改
 
+VPN_CONFIG_NAME = "VPN 设置"
+VPN_START_PATH_KEY = "VPN启动路径"
+VPN_WORKING_DIRECTORY_KEY = "VPN工作目录"
+
+vpn_config_option = ConfigOption(
+    VPN_CONFIG_NAME,
+    {
+        VPN_START_PATH_KEY: r"D:\Programs\v2rayn\v2rayN.exe",
+        VPN_WORKING_DIRECTORY_KEY: r"D:\Programs\v2rayn",
+    },
+    description="启动游戏前自动启动 VPN 客户端",
+    config_description={
+        VPN_START_PATH_KEY: "VPN 客户端可执行文件的完整路径；留空则不启动 VPN。",
+        VPN_WORKING_DIRECTORY_KEY: "VPN 客户端工作目录；留空时使用可执行文件所在目录。",
+    },
+)
+
 config = {
     'custom_tasks':True, # enable creating and editing custom tasks
     'debug': False,  # Optional, default: False
@@ -65,6 +82,9 @@ config = {
     },
     'version': version, #版本
     'my_app': ['src.globals', 'Globals'], #可选. 全局单例对象, 可以存放加载的模型, 使用og.my_app调用
+    'global_configs': [
+        vpn_config_option,
+    ],
     'onetime_tasks': [  # 用户点击触发的任务
         ["src.tasks.DailyTask", "DailyTask"],
         ["src.tasks.LauncherTask", "LauncherTask"],

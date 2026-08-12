@@ -11,6 +11,11 @@ import ok.util.window as ok_window
 
 from pathlib import Path
 
+from src.config import (
+    VPN_CONFIG_NAME,
+    VPN_START_PATH_KEY,
+    VPN_WORKING_DIRECTORY_KEY,
+)
 from src.tasks.BaseGMTask import BaseGMTask
 from qfluentwidgets import FluentIcon
 
@@ -143,6 +148,9 @@ class LauncherTask(BaseGMTask):
             #
             # 启动游戏
             #
+            if not self._start_vpn():
+                return False
+
             self.log_info("启动 gakumas.exe")
 
             process = subprocess.Popen(
@@ -173,6 +181,61 @@ class LauncherTask(BaseGMTask):
             self.log_error(traceback.format_exc())
 
             return False
+
+    def _start_vpn(self):
+        vpn_path = self.get_global_config(VPN_CONFIG_NAME).get(
+            VPN_START_PATH_KEY,
+            "",
+        ).strip()
+
+        if not vpn_path:
+            self.log_info("未配置 VPN 启动路径，跳过启动 VPN")
+            return True
+
+        if not os.path.isfile(vpn_path):
+            self.log_error(f"VPN 启动路径不存在: {vpn_path}")
+            return False
+
+        if self._is_vpn_running(vpn_path):
+            return True
+
+        working_directory = self.get_global_config(VPN_CONFIG_NAME).get(
+            VPN_WORKING_DIRECTORY_KEY,
+            "",
+        ).strip() or os.path.dirname(vpn_path)
+
+        if not os.path.isdir(working_directory):
+            self.log_error(f"VPN 工作目录不存在: {working_directory}")
+            return False
+
+        try:
+            self.log_info(f"启动 VPN: {vpn_path}")
+            subprocess.Popen(vpn_path, cwd=working_directory)
+            return True
+        except OSError as error:
+            self.log_error(f"启动 VPN 失败: {error}")
+            return False
+
+    def _is_vpn_running(self, vpn_path):
+        target_path = os.path.normcase(os.path.abspath(vpn_path))
+
+        for process in psutil.process_iter(["pid", "exe"]):
+            try:
+                process_path = process.info["exe"]
+                if process_path and os.path.normcase(
+                    os.path.abspath(process_path)
+                ) == target_path:
+                    self.log_info(f"VPN 已在运行 (PID={process.info['pid']})")
+                    return True
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+                OSError,
+            ):
+                continue
+
+        return False
 
     def _wait_for_game_window(self, timeout=120):
 
