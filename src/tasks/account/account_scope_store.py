@@ -5,9 +5,10 @@ import threading
 import uuid
 from typing import Any, Dict, List, Tuple
 
-from ok.util.file import ensure_dir_for_file, get_relative_path
+from ok.util.file import ensure_dir_for_file
 
-_STORE_PATH = get_relative_path("configs", "account_scoped_overrides.json")
+from src.paths import config_path
+
 _LOCK = threading.Lock()
 _CACHE_MTIME = object()
 _EMPTY_STORE: Dict[str, Any] = {
@@ -19,7 +20,8 @@ _CACHE_DATA: Dict[str, Any] = copy.deepcopy(_EMPTY_STORE)
 
 
 def get_store_path() -> str:
-    return _STORE_PATH
+    """账号覆盖存储文件路径；目录名取 config_folder，避免写死 configs。"""
+    return config_path("account_scoped_overrides.json")
 
 
 def _new_store() -> Dict[str, Any]:
@@ -292,8 +294,8 @@ def load_overrides(force: bool = False) -> Dict[str, Any]:
     global _CACHE_DATA
 
     with _LOCK:
-        if os.path.exists(_STORE_PATH):
-            current_mtime: Any = os.path.getmtime(_STORE_PATH)
+        if os.path.exists(get_store_path()):
+            current_mtime: Any = os.path.getmtime(get_store_path())
         else:
             current_mtime = None
 
@@ -304,7 +306,7 @@ def load_overrides(force: bool = False) -> Dict[str, Any]:
             data = _new_store()
         else:
             try:
-                with open(_STORE_PATH, "r", encoding="utf-8") as fp:
+                with open(get_store_path(), "r", encoding="utf-8") as fp:
                     data = json.load(fp)
             except Exception:
                 data = _new_store()
@@ -322,12 +324,12 @@ def save_overrides(data: Dict[str, Any]) -> Dict[str, Any]:
     normalized = _normalize(data)
 
     with _LOCK:
-        ensure_dir_for_file(_STORE_PATH)
-        with open(_STORE_PATH, "w", encoding="utf-8") as fp:
+        ensure_dir_for_file(get_store_path())
+        with open(get_store_path(), "w", encoding="utf-8") as fp:
             json.dump(normalized, fp, ensure_ascii=False, indent=2)
 
         _CACHE_DATA = normalized
-        _CACHE_MTIME = os.path.getmtime(_STORE_PATH)
+        _CACHE_MTIME = os.path.getmtime(get_store_path())
 
     return copy.deepcopy(normalized)
 
