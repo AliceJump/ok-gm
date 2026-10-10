@@ -89,9 +89,11 @@ try {
         $suggested = Get-CodeRabbitRetrySeconds $reply.comment.body
         $delay = if ($null -ne $suggested) { $suggested + $RecheckBufferSeconds } else { $DefaultRecheckSeconds }
         $nextCheck = (Get-CrNow).AddSeconds([Math]::Max(1, $delay))
-        $detail = @{ probeId = $probe.id; replyId = $reply.comment.id; reply = Get-CrPlainText $reply.comment.body; nextCheckAt = $nextCheck.ToString('o') }
+        # 统一按本机时区输出（带 offset），避免 'u'/'o' 在 UTC 基点上产生的时区歧义。
+        $nextCheckLocal = $nextCheck.ToLocalTime()
+        $detail = @{ probeId = $probe.id; replyId = $reply.comment.id; reply = Get-CrPlainText $reply.comment.body; nextCheckAt = $nextCheckLocal.ToString('o') }
         if ($nextCheck -gt $deadline -or $probeCount -eq $MaxProbes) { Complete-RateLimit 'UNAVAILABLE' $detail }
-        Write-Host "[rate-limit] unavailable; next query at $($nextCheck.ToString('u')) (a countdown is not proof of quota)"
+        Write-Host "[rate-limit] unavailable; next query at $($nextCheckLocal.ToString('yyyy-MM-dd HH:mm:ss zzz')) (a countdown is not proof of quota)"
         $stop = Wait-WithSessionCheck $nextCheck
         if ($stop) { Complete-RateLimit $stop @{ actualHead = $script:ActualHead } }
     }
