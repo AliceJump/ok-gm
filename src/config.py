@@ -3,12 +3,35 @@ import os
 import numpy as np
 from ok import ConfigOption
 from src.interaction.EfInteraction import EfInteraction
+from src.dmm.launcher import resolve_game_exe
+from src.dmm.xray import NODE_ENABLED_KEY
 version = "dev"
 #不需要修改version, Github Action打包会自动修改
 
 VPN_CONFIG_NAME = "VPN 设置"
 VPN_START_PATH_KEY = "VPN启动路径"
 VPN_WORKING_DIRECTORY_KEY = "VPN工作目录"
+DMM_CONFIG_NAME = "DMM 启动助手"
+DMM_ENABLED_KEY = "使用本地助手"
+DMM_PROXY_KEY = "本地代理入口"
+DMM_AUTO_UPDATE_KEY = "自动更新游戏"
+
+dmm_config_option = ConfigOption(
+    DMM_CONFIG_NAME,
+    {
+        DMM_ENABLED_KEY: True,
+        DMM_PROXY_KEY: "http://127.0.0.1:10808",
+        DMM_AUTO_UPDATE_KEY: True,
+        NODE_ENABLED_KEY: False,
+    },
+    description="通过本地代理获取有效登录凭证、校验更新并启动游戏",
+    config_description={
+        DMM_ENABLED_KEY: "自动使用保存的登录态检查更新并启动游戏；登录与下载操作在「游戏启动器」页面进行。",
+        DMM_PROXY_KEY: "本地 HTTP 代理地址；需在 v2rayN 选择日本节点并确认 DMM 域名分流。",
+        DMM_AUTO_UPDATE_KEY: "下载并校验官方游戏文件后替换；下载中断后可续传。",
+        NODE_ENABLED_KEY: "使用加密保存的节点配置运行独立 Xray，不随 v2rayN 的节点切换而改变。",
+    },
+)
 
 vpn_config_option = ConfigOption(
     VPN_CONFIG_NAME,
@@ -26,7 +49,7 @@ vpn_config_option = ConfigOption(
 config = {
     'custom_tasks':True, # enable creating and editing custom tasks
     'debug': False,  # Optional, default: False
-    'use_gui': True, # 目前只支持True
+    'gui': {'type': 'qt'},
     'config_folder': 'configs', #最好不要修改
     'gui_icon': 'icons/icon.png', #窗口图标, 最好不需要修改文件名
     'wait_until_before_delay': 0,
@@ -48,7 +71,8 @@ config = {
         'check_hdr': False, #当用户开启AutoHDR时候提示用户, 但不禁止使用
         'force_no_hdr': False, #True=当用户开启AutoHDR时候禁止使用
         'require_bg': True, # 要求使用后台截图
-        "start_exe": False,
+        "start_exe": True,
+        "calculate_pc_exe_path": resolve_game_exe,
     },
     'start_timeout': 120,  # default 60
     'window_size': { #ok-script窗口大小
@@ -84,11 +108,16 @@ config = {
     'my_app': ['src.globals', 'Globals'], #可选. 全局单例对象, 可以存放加载的模型, 使用og.my_app调用
     'global_configs': [
         vpn_config_option,
+        dmm_config_option,
     ],
+    'custom_tabs': [["src.ui.DmmLauncherTab", "DmmLauncherTab"], ["src.ui.AccountConfigTab", "AccountConfigTab"]],
     'onetime_tasks': [  # 用户点击触发的任务
         ["src.tasks.DailyTask", "DailyTask"],
-        ["src.tasks.LauncherTask", "LauncherTask"],
         ["src.tasks.TestTask", "TestTask"],
         ["ok", "DiagnosisTask"],
     ],
 }
+
+# The framework CLI imports this config directly, without running main.py.
+from src.patches.startup import install_startup_patches
+install_startup_patches()

@@ -325,13 +325,40 @@ def save_overrides(data: Dict[str, Any]) -> Dict[str, Any]:
 
     with _LOCK:
         ensure_dir_for_file(get_store_path())
-        with open(get_store_path(), "w", encoding="utf-8") as fp:
-            json.dump(normalized, fp, ensure_ascii=False, indent=2)
+        from pathlib import Path
+        from src.dmm.session import atomic_write
+        atomic_write(Path(get_store_path()), json.dumps(normalized, ensure_ascii=False, indent=2).encode('utf-8'))
 
         _CACHE_DATA = normalized
         _CACHE_MTIME = os.path.getmtime(get_store_path())
 
     return copy.deepcopy(normalized)
+
+
+def dmm_account_id(number: str) -> str:
+    """Login snapshots may change; the user's account number remains stable."""
+    return 'dmm_' + number
+
+
+def bind_dmm_accounts(entries) -> None:
+    data = load_overrides(force=True)
+    registry = data.setdefault('account_registry', {})
+    changed = False
+    for entry in entries:
+        number = entry['number']
+        account_id = dmm_account_id(number)
+        if account_id in registry and registry[account_id].get('username') == number:
+            continue
+        old_id = _find_account_id_by_username(registry, number)
+        _ensure_registry_entry(registry, number, account_id)
+        # Retain the legacy record; reuse its values only when the new slot has no values.
+        if old_id and old_id != account_id and data['accounts'].get(old_id):
+            target = data['accounts'].setdefault(account_id, {})
+            for task, values in data['accounts'][old_id].items():
+                target.setdefault(task, copy.deepcopy(values))
+        changed = True
+    if changed:
+        save_overrides(data)
 
 
 def sync_account_list_text(text: str) -> Dict[str, Any]:

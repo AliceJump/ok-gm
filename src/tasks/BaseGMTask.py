@@ -10,6 +10,80 @@ class BaseGMTask(RuntimeMixin, LoginMixin, AccountOverrideMixin, BaseTask):
         super().__init__(*args, **kwargs)
         self._logged_in = False
         self.ScreenRow = ScreenRow
+        self.current_user = ''
+        self.current_account_id = ''
+        self.default_config.update({'多账户模式': False, '多账户独立配置': True, '账号列表': ''})
+        self.config_description.update({
+            '多账户模式': '按保存的 DMM 账号逐个执行任务，切换时会关闭并重新启动游戏。',
+            '多账户独立配置': '运行时使用「账号配置」页面保存的当前账号任务参数。',
+            '账号列表': '每行填写一个已保存的 DMM 账号编号；留空时按启动器中的账号顺序执行。',
+        })
+        self.config_type['多账户模式'] = {'sub_configs': {True: ['账号列表']}}
+
+    def after_init(self, *args, **kwargs):
+        super().after_init(*args, **kwargs)
+        self._bind_account_aware_config_get()
+        if not getattr(self, '_account_run_bound', False):
+            from functools import wraps
+            run = self.run
+
+            @wraps(run)
+            def account_run(*args, **kwargs):
+                self.use_active_account_context()
+                try:
+                    return run(*args, **kwargs)
+                finally:
+                    self.set_current_account('', '')
+
+            self.run = account_run
+            self._account_run_bound = True
+
+    def get_account_list(self):
+        from src.dmm.accounts import AccountStore
+        from src.dmm.session import DmmError, data_dir
+        from src.tasks.account.account_scope_store import bind_dmm_accounts, dmm_account_id
+        entries = AccountStore(data_dir()).read()['accounts']
+        text = self._raw_cfg_get('账号列表', '')
+        numbers = list(dict.fromkeys(line.strip() for line in text.splitlines() if line.strip()))
+        by_number = {e['number']: e for e in entries}
+        if any(number not in by_number for number in numbers):
+            raise DmmError('任务账号列表包含未保存的编号，请在游戏启动器中先保存账号')
+        selected = [by_number[number] for number in numbers] if numbers else entries
+        bind_dmm_accounts(selected)
+        return [{'username': e['number'], 'account_id': dmm_account_id(e['number'])} for e in selected]
+
+    def use_active_account_context(self):
+        from src.dmm.accounts import AccountStore
+        from src.dmm.session import data_dir
+        from src.tasks.account.account_scope_store import bind_dmm_accounts, dmm_account_id
+        active = AccountStore(data_dir()).active()
+        if active:
+            bind_dmm_accounts([active])
+            self.set_current_account(active['number'], dmm_account_id(active['number']))
+        else:
+            self.set_current_account('', '')
+
+    def switch_task_account(self, number):
+        from src.dmm.accounts import AccountStore
+        from src.dmm.helper import close_game, helper_lock
+        from src.dmm.session import data_dir, OperationCancelled
+        from ok import og
+
+        def cancelled():
+            if self.exit_is_set() or not self.enabled:
+                raise OperationCancelled('任务已停止，已取消账号切换')
+
+        with helper_lock(data_dir()):
+            cancelled()
+            close_game(self.log_info, cancelled)
+            AccountStore(data_dir()).switch(number)
+        self._logged_in = False
+        # Refresh capture after closing, then use the same framework launch pipeline.
+        og.device_manager.do_refresh(True)
+        cancelled()
+        if not self._app.start_controller.start_device(initial_refresh_done=True):
+            raise RuntimeError('切换账号后游戏启动失败，已停止任务')
+        self.executor.reset_scene()
 
     def iter_multi_account_context(self, repeat_times: int = 1, empty_accounts_message: str | None = None,
                                    account_log_suffix: str = "", allow_multi_account: bool = True):
@@ -48,9 +122,9 @@ class BaseGMTask(RuntimeMixin, LoginMixin, AccountOverrideMixin, BaseTask):
 
                 self.set_current_account(username, account_id)
                 self.log_info(f"开始第 {repeat_idx + 1}/{repeat_times} 个账号({username[-4:]}){account_log_suffix}")
-                self.login_flow(username)
+                self.switch_task_account(username)
             else:
-                self.set_current_account("", "")
+                self.use_active_account_context()
 
             yield repeat_idx, repeat_times
 
@@ -103,4 +177,4 @@ class BaseGMTask(RuntimeMixin, LoginMixin, AccountOverrideMixin, BaseTask):
         self.current_account_id = account_id
         self._bind_account_aware_config_get()
 
-    
+

@@ -93,11 +93,20 @@ class AccountOverrideMixin:
     def _config_get_with_account_override(self, key, default, raw_get):
         base_value = raw_get(key, default)
 
+        if not getattr(self, 'running', False) or key in {'多账户模式', '多账户独立配置', '账号列表'}:
+            return base_value
         if not self._is_account_override_enabled():
             return base_value
 
-        account_id = (self.current_account_id or "").strip()
-        account_name = (self.current_user or "").strip()
+        account_id = (getattr(self, 'current_account_id', '') or "").strip()
+        account_name = (getattr(self, 'current_user', '') or "").strip()
+        if not account_id and not account_name:
+            from src.dmm.accounts import AccountStore
+            from src.dmm.session import data_dir
+            from src.tasks.account.account_scope_store import dmm_account_id
+            active = AccountStore(data_dir()).active()
+            if active:
+                account_id, account_name = dmm_account_id(active['number']), active['number']
         if not account_id and not account_name:
             return base_value
 

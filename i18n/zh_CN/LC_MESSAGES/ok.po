@@ -242,3 +242,228 @@ msgstr "请只选择可用的多选值。"
 
 msgid "Select only available drop-down option values."
 msgstr "请只选择可用的下拉框选项值。"
+
+msgid "游戏启动器"
+msgstr "游戏启动器"
+
+msgid "保存登录态，使用指定代理检查更新并启动学园偶像大师。"
+msgstr "保存登录态，使用指定代理检查更新并启动学园偶像大师。"
+
+msgid "本地代理入口"
+msgstr "本地代理入口"
+
+msgid "保存代理"
+msgstr "保存代理"
+
+msgid "在 v2rayN 选择日本节点；此入口用于登录、更新与下载。"
+msgstr "在 v2rayN 选择日本节点；此入口用于登录、更新与下载。"
+
+msgid "启动前自动检查并更新游戏"
+msgstr "启动前自动检查并更新游戏"
+
+msgid "框架启动游戏时使用此启动器"
+msgstr "框架启动游戏时使用此启动器"
+
+msgid "浏览器登录"
+msgstr "浏览器登录"
+
+msgid "复用 DMM 登录态"
+msgstr "复用 DMM 登录态"
+
+msgid "检查登录状态"
+msgstr "检查登录状态"
+
+msgid "检查更新"
+msgstr "检查更新"
+
+msgid "更新游戏"
+msgstr "更新游戏"
+
+msgid "启动游戏"
+msgstr "启动游戏"
+
+msgid "已有加密登录态，可检查状态或直接启动。"
+msgstr "已有加密登录态，可检查状态或直接启动。"
+
+msgid "首次使用请登录，或复用 DMM Player 的登录态。"
+msgstr "首次使用请登录，或复用 DMM Player 的登录态。"
+
+msgid "取消当前操作"
+msgstr "取消当前操作"
+
+msgid "浏览器登录可使用已保存密码。成功后按 Ctrl+L、Ctrl+C 复制成功页地址；登录期间临时启用代理，结束后恢复。"
+msgstr "浏览器登录可使用已保存密码。成功后按 Ctrl+L、Ctrl+C 复制成功页地址；登录期间临时启用代理，结束后恢复。"
+
+msgid "代理设置已保存"
+msgstr "代理设置已保存"
+
+msgid "正在处理，请稍候…"
+msgstr "正在处理，请稍候…"
+
+msgid "正在取消并恢复设置…"
+msgstr "正在取消并恢复设置…"
+
+msgid "DMM 启动助手"
+msgstr "DMM 启动助手"
+
+msgid "使用本地助手"
+msgstr "使用本地助手"
+
+msgid "自动更新游戏"
+msgstr "自动更新游戏"
+
+msgid "通过本地代理获取有效登录凭证、校验更新并启动游戏"
+msgstr "通过本地代理获取有效登录凭证、校验更新并启动游戏"
+
+msgid "自动使用保存的登录态检查更新并启动游戏；登录与下载操作在「游戏启动器」页面进行。"
+msgstr "自动使用保存的登录态检查更新并启动游戏；登录与下载操作在「游戏启动器」页面进行。"
+
+msgid "本地 HTTP 代理地址；需在 v2rayN 选择日本节点并确认 DMM 域名分流。"
+msgstr "本地 HTTP 代理地址；需在 v2rayN 选择日本节点并确认 DMM 域名分流。"
+
+msgid "下载并校验官方游戏文件后替换；下载中断后可续传。"
+msgstr "下载并校验官方游戏文件后替换；下载中断后可续传。"
+
+msgid "使用独立 Xray 节点"
+msgstr "使用独立 Xray 节点"
+
+msgid "使用加密保存的节点配置运行独立 Xray，不随 v2rayN 的节点切换而改变。"
+msgstr "使用加密保存的节点配置运行独立 Xray，不随 v2rayN 的节点切换而改变。"
+
+msgid "粘贴节点分享链接，内容会隐藏"
+msgstr "粘贴节点分享链接，内容会隐藏"
+
+msgid "保存节点"
+msgstr "保存节点"
+
+msgid "导入 JSON 文件"
+msgstr "导入 JSON 文件"
+
+msgid "安装独立 Xray"
+msgstr "安装独立 Xray"
+
+msgid "账号登录文件"
+msgstr "账号登录文件"
+
+msgid "账号编号，例如 1"
+msgstr "账号编号，例如 1"
+
+msgid "账号名称"
+msgstr "账号名称"
+
+msgid "保存当前登录态"
+msgstr "保存当前登录态"
+
+msgid "切换所选账号"
+msgstr "切换所选账号"
+
+msgid "新账号登录并保存"
+msgstr "新账号登录并保存"
+
+msgid "记录当前 DMM 为新账号"
+msgstr "记录当前 DMM 为新账号"
+
+msgid "新账号使用新编号保存。切换前先关闭游戏；不会覆盖 DMM Player 的账号文件。"
+msgstr "新账号使用新编号保存。切换前先关闭游戏；不会覆盖 DMM Player 的账号文件。"
+
+msgid "选择已保存账号"
+msgstr "选择已保存账号"
+
+msgid "当前账号"
+msgstr "当前账号"
+
+msgid "当前登录态尚未归档"
+msgstr "当前登录态尚未归档"
+
+msgid "已保存节点"
+msgstr "已保存节点"
+
+msgid "尚未导入固定节点；导入成功后自动启用独立 Xray。"
+msgstr "尚未导入固定节点；导入成功后自动启用独立 Xray。"
+
+msgid "导入节点配置"
+msgstr "导入节点配置"
+
+msgid "节点文件无法读取或超过 1 MiB"
+msgstr "节点文件无法读取或超过 1 MiB"
+
+msgid "外部代理模式在 v2rayN 选择日本节点；独立 Xray 使用下方保存的节点。"
+msgstr "外部代理模式在 v2rayN 选择日本节点；独立 Xray 使用下方保存的节点。"
+
+msgid "下次优先使用"
+msgstr "下次优先使用"
+
+msgid "启用或停用节点"
+msgstr "启用或停用节点"
+
+msgid "移除节点"
+msgstr "移除节点"
+
+msgid "节点按顺序轮换；连接失败自动尝试下一个，下载会保留断点。"
+msgstr "节点按顺序轮换；连接失败自动尝试下一个，下载会保留断点。"
+
+msgid "已启用"
+msgstr "已启用"
+
+msgid "已停用"
+msgstr "已停用"
+
+msgid "下次开始节点："
+msgstr "下次开始节点："
+
+msgid "没有启用节点"
+msgstr "没有启用节点"
+
+msgid "账号配置"
+msgstr "账号配置"
+
+msgid "选择启动器中保存的账号，再设置该账号的任务参数。改名或重新保存登录文件会保留这些配置。"
+msgstr "选择启动器中保存的账号，再设置该账号的任务参数。改名或重新保存登录文件会保留这些配置。"
+
+msgid "保存账号任务配置"
+msgstr "保存账号任务配置"
+
+msgid "恢复使用任务默认配置"
+msgstr "恢复使用任务默认配置"
+
+msgid "刷新账号列表"
+msgstr "刷新账号列表"
+
+msgid "账号配置只在任务运行时应用；任务运行期间不能编辑。"
+msgstr "账号配置只在任务运行时应用；任务运行期间不能编辑。"
+
+msgid "保存后仅覆盖所选账号的任务参数"
+msgstr "保存后仅覆盖所选账号的任务参数"
+
+msgid "当前账号的任务配置已保存"
+msgstr "当前账号的任务配置已保存"
+
+msgid "当前账号将使用任务默认配置"
+msgstr "当前账号将使用任务默认配置"
+
+msgid "任务运行中，不能修改或切换登录账号"
+msgstr "任务运行中，不能修改或切换登录账号"
+
+msgid "多账户模式"
+msgstr "多账户模式"
+
+msgid "多账户独立配置"
+msgstr "多账户独立配置"
+
+msgid "账号列表"
+msgstr "账号列表"
+
+msgid "按保存的 DMM 账号逐个执行任务，切换时会关闭并重新启动游戏。"
+msgstr "按保存的 DMM 账号逐个执行任务，切换时会关闭并重新启动游戏。"
+
+msgid "运行时使用「账号配置」页面保存的当前账号任务参数。"
+msgstr "运行时使用「账号配置」页面保存的当前账号任务参数。"
+
+msgid "每行填写一个已保存的 DMM 账号编号；留空时按启动器中的账号顺序执行。"
+msgstr "每行填写一个已保存的 DMM 账号编号；留空时按启动器中的账号顺序执行。"
+
+msgid "请先在游戏启动器保存账号"
+msgstr "请先在游戏启动器保存账号"
+
+msgid "没有支持账号配置的任务"
+msgstr "没有支持账号配置的任务"
