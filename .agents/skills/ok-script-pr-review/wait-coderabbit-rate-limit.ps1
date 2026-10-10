@@ -89,7 +89,7 @@ try {
         $suggested = Get-CodeRabbitRetrySeconds $reply.comment.body
         $delay = if ($null -ne $suggested) { $suggested + $RecheckBufferSeconds } else { $DefaultRecheckSeconds }
         $nextCheck = (Get-CrNow).AddSeconds([Math]::Max(1, $delay))
-        # 统一按本机时区输出（带 offset），避免 'u'/'o' 在 UTC 基点上产生的时区歧义。
+        # Report the local time zone with an explicit offset to avoid UTC-based 'u'/'o' ambiguity.
         $nextCheckLocal = $nextCheck.ToLocalTime()
         $detail = @{ probeId = $probe.id; replyId = $reply.comment.id; reply = Get-CrPlainText $reply.comment.body; nextCheckAt = $nextCheckLocal.ToString('o') }
         if ($nextCheck -gt $deadline -or $probeCount -eq $MaxProbes) { Complete-RateLimit 'UNAVAILABLE' $detail }

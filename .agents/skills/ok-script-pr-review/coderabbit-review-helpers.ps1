@@ -393,3 +393,57 @@ function Test-CrThreadOutcomePending {
     param([string]$Outcome)
     return $Outcome -in $script:CrThreadPendingFlags
 }
+
+# Section headings CodeRabbit uses for findings it can only embed in the review
+# body (no inline thread of their own). Each entry maps the heading fragment to
+# the kind reported in the output.
+$script:CrEmbeddedSections = @(
+    @{ Pattern = 'Outside diff range comments'; Kind = 'outsideDiff' }
+    @{ Pattern = 'Nitpick comments'; Kind = 'nitpick' }
+)
+
+function Get-CodeRabbitEmbeddedFindings {
+    # Parses the review body section by section so a heading only claims the
+    # findings that belong to it: outside-diff findings must not absorb a later
+    # nitpick section, and every finding carries its own kind.
+    param([object]$Review)
+    $body = [string]$Review.body
+    $findings = @()
+    if (-not $body) { return $findings }
+
+    # Locate every section heading (the <summary> that opens a findings group).
+    $headings = @()
+    foreach ($section in $script:CrEmbeddedSections) {
+        foreach ($m in [regex]::Matches($body, "<summary>[^<]*$([regex]::Escape($section.Pattern))[^<]*</summary>")) {
+            $headings += [pscustomobject]@{ Kind = $section.Kind; Start = $m.Index }
+        }
+    }
+    if ($headings.Count -eq 0) { return $findings }
+    $headings = @($headings | Sort-Object Start)
+
+    for ($i = 0; $i -lt $headings.Count; $i++) {
+        $start = $headings[$i].Start
+        $end = if ($i + 1 -lt $headings.Count) { $headings[$i + 1].Start } else { $body.Length }
+        $section = $body.Substring($start, $end - $start)
+        $kind = $headings[$i].Kind
+
+        # Walk each cr-comment marker and take the nearest preceding <summary>.
+        # The nearest summary is the finding's own; a file-group summary sits
+        # further up (its opening tag precedes the nested block), so scanning
+        # backwards from the marker naturally skips it.
+        foreach ($marker in [regex]::Matches($section, '<!--\s*cr-comment:v1:([0-9a-f]+)\s*-->')) {
+            $before = $section.Substring(0, $marker.Index)
+            $summaries = [regex]::Matches($before, '(?s)<summary>(.*?)</summary>')
+            if ($summaries.Count -eq 0) { continue }
+            $summary = $summaries[$summaries.Count - 1].Groups[1].Value
+            $location = [regex]::Match($summary, '<code>([^<]+)</code>')
+            $findings += [pscustomobject]@{
+                reviewId = $Review.id; commitId = $Review.commit_id; kind = $kind
+                crCommentId = $marker.Groups[1].Value
+                location = $(if ($location.Success) { $location.Groups[1].Value } else { '' })
+                title = (Get-CrPlainText ($summary -replace '<[^>]+>', ' '))
+            }
+        }
+    }
+    return $findings
+}

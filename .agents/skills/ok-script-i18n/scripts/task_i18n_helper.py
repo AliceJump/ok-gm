@@ -1,6 +1,6 @@
 import argparse
 import ast
-import re
+import string
 from collections import Counter
 from pathlib import Path
 
@@ -17,7 +17,32 @@ CONFIG_TYPE_META = {
     "text_edit",
     "button",
 }
-PLACEHOLDER_RE = re.compile(r"\{[^{}]+\}")
+
+
+def positional_field_specs(template):
+    """返回模板中位置字段的规格列表（按出现顺序，含空字段 `{}`）。
+
+    使用 Python 的 format string 解析器而非正则，以便正确区分转义花括号
+    `{{`/`}}`，并把空字段 `{}` 计为第 0 号位置字段。自动编号字段（`{}`）与
+    显式编号字段（`{0}`）都归入位置字段计数；具名字段（`{name}`）不计入。
+    模板语法非法时返回 None，表示无法判定，交由调用方跳过该项校验。
+    """
+    try:
+        parsed = list(string.Formatter().parse(template))
+    except ValueError:
+        return None
+    specs = []
+    for _, field_name, _, _ in parsed:
+        if field_name is None:
+            continue
+        if field_name == "":
+            specs.append("")
+            continue
+        head = field_name.split(".", 1)[0].split("[", 1)[0]
+        if head.isdigit():
+            specs.append(head)
+        # 具名字段不参与位置字段比较
+    return specs
 
 
 class TaskStringVisitor(ast.NodeVisitor):
@@ -131,12 +156,14 @@ def iter_po_paths(i18n_dir):
 
 
 def entry_key(entry):
-    return entry.msgctxt, entry.msgid, entry.msgid_plural
+    # 重复项判定只依据 (msgctxt, msgid)：同一上下文与源文的条目即使 msgid_plural
+    # 不同，也属于目录内的无效重复。复数源文在跨语言目录比较中单独校验。
+    return entry.msgctxt, entry.msgid
 
 
 def entry_key_sort(key):
-    context, msgid, plural = key
-    return context is not None, context or "", msgid, plural or ""
+    context, msgid = key
+    return context is not None, context or "", msgid
 
 
 def translated_strings(entry):
@@ -176,6 +203,7 @@ def check_i18n(i18n_dir):
 
     failed = False
     catalog_keys = {}
+    catalog_plurals = {}
     for po_path in paths:
         po = polib.pofile(str(po_path))
         locale = po_path.parents[1].name
@@ -188,8 +216,8 @@ def check_i18n(i18n_dir):
         if duplicates:
             failed = True
             print(f"duplicate entries in {po_path}:")
-            for context, msgid, plural in duplicates:
-                print(f"  context={context!r} msgid={msgid!r} plural={plural!r}")
+            for context, msgid in duplicates:
+                print(f"  context={context!r} msgid={msgid!r}")
 
         for entry in entries:
             translations = translated_strings(entry)
@@ -199,26 +227,42 @@ def check_i18n(i18n_dir):
                 failed = True
                 print(f"empty translation in {po_path}: {entry.msgid!r}")
                 continue
-            expected_singular = set(PLACEHOLDER_RE.findall(entry.msgid))
+            expected_singular = positional_field_specs(entry.msgid)
             expected_plural = expected_singular
             if entry.msgid_plural:
-                expected_plural = set(PLACEHOLDER_RE.findall(entry.msgid_plural))
+                expected_plural = positional_field_specs(entry.msgid_plural)
+            if expected_singular is None or expected_plural is None:
+                print(f"skipped placeholder check (unparsable source) in {po_path}: {entry.msgid!r}")
+                continue
+            expected_sets = {tuple(expected_singular), tuple(expected_plural)}
             for translation in translations:
-                actual = set(PLACEHOLDER_RE.findall(translation))
-                if frozenset(actual) not in {frozenset(expected_singular), frozenset(expected_plural)}:
+                actual = positional_field_specs(translation)
+                if actual is None:
+                    failed = True
+                    print(
+                        f"placeholder parse error in {po_path}: {entry.msgid!r} "
+                        f"translation={translation!r} is not a valid format string"
+                    )
+                    continue
+                if tuple(actual) not in expected_sets:
                     failed = True
                     print(
                         f"placeholder mismatch in {po_path}: {entry.msgid!r} "
-                        f"expected={sorted(expected_singular)} or {sorted(expected_plural)} "
-                        f"actual={sorted(actual)}"
+                        f"expected={expected_singular} or {expected_plural} "
+                        f"actual={actual}"
                     )
 
         catalog_keys[locale] = set(keys)
+        # 单独记录复数源文：重复项判定已不包含 msgid_plural，跨语言比较时再单独校验。
+        catalog_plurals[locale] = {
+            entry_key(entry): entry.msgid_plural for entry in entries
+        }
         if not duplicates:
             print(f"ok {po_path}")
 
     reference_locale = sorted(catalog_keys)[0]
     reference_keys = catalog_keys[reference_locale]
+    reference_plurals = catalog_plurals[reference_locale]
     for locale, keys in sorted(catalog_keys.items()):
         missing = sorted(reference_keys - keys, key=entry_key_sort)
         extra = sorted(keys - reference_keys, key=entry_key_sort)
@@ -229,6 +273,23 @@ def check_i18n(i18n_dir):
                 print(f"  missing {key}")
             for key in extra[:20]:
                 print(f"  extra {key}")
+        # 跨语言复数源文比较：同一 key 的 msgid_plural 必须与参考语言一致。
+        plural_mismatch = sorted(
+            (
+                key
+                for key in reference_keys & keys
+                if reference_plurals.get(key) != catalog_plurals[locale].get(key)
+            ),
+            key=entry_key_sort,
+        )
+        if plural_mismatch:
+            failed = True
+            print(f"plural source mismatch for {locale} vs {reference_locale}: {len(plural_mismatch)}")
+            for key in plural_mismatch[:20]:
+                print(
+                    f"  {key!r} reference={reference_plurals.get(key)!r} "
+                    f"actual={catalog_plurals[locale].get(key)!r}"
+                )
     if failed:
         raise SystemExit(1)
 

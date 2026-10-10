@@ -175,6 +175,9 @@ try {
                 }
                 if ($quota.state -in @('CLOSED', 'DRAFT')) { Complete-Wait $quota.state $head -Extra @{ quota = $quota } }
                 if ($quota.state -eq 'ERROR') { Complete-Wait 'ERROR' $head $info -Extra @{ error = $quota.error; quota = $quota } }
+                # NO_REPLY/UNKNOWN_REPLY mean the bot did not answer the quota probe; report them as-is
+                # (exit 12) so the caller knows a human must check, instead of waiting as if rate limited.
+                if ($quota.state -in @('NO_REPLY', 'UNKNOWN_REPLY')) { Complete-Wait $quota.state $head -Extra @{ quota = $quota } }
                 if ($quota.state -ne 'AVAILABLE' -or $quotaExit -ne 0) { Complete-Wait 'RATE_LIMITED' $head $info -Extra @{ quota = $quota } }
 
                 # Re-check everything the quota wait may have outdated before the single trigger.
