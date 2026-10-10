@@ -80,6 +80,11 @@ This software is open-source and free of charge. It is intended solely for perso
 
 * Supports adding one-time tasks (such as `Daily Tasks`) to Windows Task Scheduler for automatic execution at specified times
 
+### Game Launcher (Experimental)
+
+* Local DMM login, game update, and launch helper with standalone Xray nodes and multi-account session files
+* See [docs/dmm-helper.md](docs/dmm-helper.md) for details
+
 ### Automation Capabilities
 
 * OCR Recognition, Template Matching, HSV Color Recognition
@@ -112,12 +117,14 @@ If you encounter issues, please go through the following checklist before asking
 
 This project only supports Python 3.12. CMD, PyCharm, and VSCode **must be launched with Administrator privileges**.
 
+Dependency management is based on `pyproject.toml` / `uv.lock` (`requirements.txt` is exported by uv).
+
 ```bash
 # If the repository was cloned without submodules, run:
 git submodule update --init --recursive
 
-# Install or update dependencies
-pip install -r requirements.txt --upgrade
+# Install or update dependencies (uv recommended)
+uv sync
 
 # Run Release version
 python main.py

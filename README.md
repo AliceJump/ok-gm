@@ -83,6 +83,10 @@ An image-recognition-based automation tool for End Field, with background mode s
 ### 定时任务
 - 支持将一次性任务(比如 `日常任务`)加入 Windows 任务计划，按设定时间自动启动执行
 
+### 游戏启动器（实验功能）
+- 本地 DMM 登录、游戏更新与启动助手，支持独立 Xray 节点与多账号登录文件
+- 详见 [docs/dmm-helper.md](docs/dmm-helper.md)
+
 ### 辅助能力
 - OCR 识别、模板匹配、HSV 颜色识别
 - UI 自动化、按键模拟
@@ -113,12 +117,14 @@ An image-recognition-based automation tool for End Field, with background mode s
 
 本项目仅支持 Python 3.12 版本, 必须以管理员权限启动CMD, PyCharm, VSCode。
 
+依赖管理以 `pyproject.toml` / `uv.lock` 为准（`requirements.txt` 由 uv 导出）。
+
 ```bash
 # 若首次 clone 未带子模块参数，请先执行
 git submodule update --init --recursive
 
-# 安装或更新依赖
-pip install -r requirements.txt --upgrade
+# 安装或更新依赖（推荐使用 uv）
+uv sync
 
 # 运行 Release 版本
 python main.py
