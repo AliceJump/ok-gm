@@ -1,66 +1,37 @@
 ---
 name: ok-script-i18n
-description: Add, sync, repair, and compile gettext translations for ok-script Python task classes and task metadata. Use when Codex needs to translate or internationalize BaseTask and TriggerTask names, descriptions, default_config keys or values, config_description help text, config_type options, OCR-facing UI strings, or locale-specific ok.po catalogs in ok-script style projects.
+description: Maintain gettext translations for ok-script task UI and runtime messages. Use for task metadata, config labels and options, instructions, PO/MO catalogs, or translation-pool pollution; OCR matcher JSON belongs to ok-script-ocr-lang.
 ---
 
 # OK Script i18n
 
-## Overview
+## Sync task strings
 
-Use this skill for gettext translation work in ok-script projects that keep catalogs under `i18n/<locale>/LC_MESSAGES/ok.po`. It complements `$ok-script-tasks`: create task behavior with the task skill, then use this skill to keep task UI strings translated and compiled.
+1. Inspect every changed task class for visible names, descriptions, config keys/help/options, instructions, and runtime messages. In ok-gm, check composed tasks too; scanning `DailyTask` alone may miss strings in subtask classes.
+2. Discover locales from `i18n/*/LC_MESSAGES/ok.po`. Keep `msgid` identical to the source text, append missing entries at the end of **every** locale, and preserve existing translations, entry metadata, and entry order; do not sort the catalogs.
+3. Run the helper in the locked environment. Its scanner catches literal metadata assignments and `.update(...)` calls, but constants, imports, f-strings, comprehensions, and helper-built values still need manual review:
 
-## Workflow
+   `uv run --locked python .agents/skills/ok-script-i18n/scripts/task_i18n_helper.py scan --task src/tasks/onetime/DailyDeliveryTask.py`
 
-1. Inspect the target task file and collect user-facing task metadata:
-   - `self.name`
-   - `self.description`
-   - keys and string values in `self.default_config`
-   - string values in `self.config_description`
-   - dropdown, multi-selection, list, and button option strings in `self.config_type`
-   - OCR text lists only when they are user-visible or intended to be localized
-2. Discover locales by listing `i18n/*/LC_MESSAGES/ok.po`.
-   Do not hard-code a fixed language list.
-3. Check whether each source string already exists in every catalog.
-4. Add missing `msgid` blocks to every locale.
-   Preserve existing `msgstr` values unless the user asks to revise translations.
-5. Translate missing entries into every locale present in the repo.
-6. Compile every changed `ok.po` into `ok.mo`.
-7. Verify catalog syntax and check for duplicate `msgid` entries.
+4. Check catalogs, compile changed PO files to MO, and run the repository's pollution/consistency test:
 
-## Helper Script
+   ```powershell
+   uv run --locked python .agents/skills/ok-script-i18n/scripts/task_i18n_helper.py check --i18n i18n
+   uv run --locked python .agents/skills/ok-script-i18n/scripts/task_i18n_helper.py compile --i18n i18n
+   uv run --locked python -m unittest tests.TestPoLocaleConsistency -v
+   ```
 
-Use `scripts/task_i18n_helper.py` when helpful:
+Translate concise UI text, preserving placeholders, code-significant punctuation, and hotkey names such as `F8` or `Ctrl`. An empty `msgstr` is appropriate only for an intentional source-language fallback. Do not add log-only strings unless requested.
 
-```powershell
-.\.venv\Scripts\python.exe .agent\skills\ok-script-i18n\scripts\task_i18n_helper.py scan --task src\task\DailyTask.py
-.\.venv\Scripts\python.exe .agent\skills\ok-script-i18n\scripts\task_i18n_helper.py check --i18n i18n
-.\.venv\Scripts\python.exe .agent\skills\ok-script-i18n\scripts\task_i18n_helper.py compile --i18n i18n
-```
+## Keep translation inputs stable
 
-The scanner is a helper, not a substitute for reading the task. It finds common literal strings but can miss values built through constants, imports, f-strings, comprehensions, or helper functions.
+- Call `self.tr("固定文本")` or `self.tr("模板 {value}").format(...)`. Never pass formatted runtime data, OCR output, account names, or user input into `tr()`; debug collection would add them as bogus msgids.
+- Static log literals can stay in `log_info("固定文本")` because the rendering layer translates them. For dynamic logs, translate the stable outer template before formatting; `log_info` and `mark_task_failure` do not format arguments.
+- Dynamic user-input dropdown values bypass translation through `src/core/dynamic_config_keys.py`. Do not register project-resource option lists there. Use `re.Pattern.pattern` when formatting regexes into messages.
+- If catalogs are polluted, fix the producer, remove bad entries from every locale, then rerun check, compile, and `TestPoLocaleConsistency`.
 
-## Catalog Rules
+## Keep gettext separate from OCR language JSON
 
-- Keep `msgid` exactly equal to the source string used by the code.
-- Append new entries near the end if the catalog is not otherwise sorted.
-- Do not add log-only strings unless the user explicitly asks.
-- Focus on GUI-visible task metadata, config labels, config options, and help text.
-- Empty `msgstr` is acceptable only when that locale intentionally falls back to the source language.
-- Preserve translator comments, flags, previous `msgid` data, and existing entry order when possible.
-- After editing `.po`, always compile `.mo`.
+`assets/lang/` and `src/data/lang/` belong to `$ok-script-ocr-lang`; read that skill before editing them. GUI explanations use gettext, not lang JSON. Keep decoration such as emoji and HTML outside msgids when it needs no translation. Persisted config keys remain raw for lookup, but pass a stable key through `self.tr(key)` when displaying it; changing a stored key requires `$ok-config-migration`.
 
-## Translation Guidance
-
-- Prefer concise UI text over literal word-for-word translation.
-- Keep placeholders, punctuation required by code, and hotkey names unchanged.
-- Keep config keys stable when they are persisted in JSON. Translate the catalog entry for display, not the Python key, unless the project already stores localized keys.
-- For Chinese locales, distinguish Simplified (`zh_CN`) and Traditional (`zh_TW`) when both catalogs exist.
-- For option lists, translate each option string that appears in the UI.
-
-## Integration With Task Work
-
-When adding or modifying an ok-script task:
-
-1. First use `$ok-script-tasks` to implement the task and identify user-facing strings.
-2. Then use `$ok-script-i18n` to sync gettext catalogs for those strings.
-3. Compile catalogs and include changed `.po` and `.mo` files in the final change summary.
+For PO merge conflicts, read [references/merge-po.md](references/merge-po.md). On Windows, programmatic PO writes may convert LF to CRLF; keep touched catalogs in the repository's LF format before compiling.
