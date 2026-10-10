@@ -8,7 +8,7 @@ Markdown containing `code`.
 '@
 $bodyPath = Join-Path $env:TEMP 'codex-pr-body.md'
 [IO.File]::WriteAllText($bodyPath, $body, [Text.UTF8Encoding]::new($false))
-$pr = gh pr create --base master --head $branch --title $title --body-file $bodyPath
+$pr = gh pr create --base main --head $branch --title $title --body-file $bodyPath
 ```
 
 For an edit, set `$pr` to the PR number and use `gh pr edit $pr --body-file $bodyPath`. Fetch and compare the entire remote body after either operation:

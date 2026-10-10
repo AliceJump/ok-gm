@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Local Venv"
   short_description: "Prefer the repository .venv for Python commands."
-  default_prompt: "Use the repository .venv when running Python commands, falling back to global Python only when no local virtual environment exists."
+  default_prompt: "Use the repository .venv for Python commands. Run `uv sync --locked` to prepare the environment; if it cannot be prepared, report the environment problem instead of falling back to global Python."

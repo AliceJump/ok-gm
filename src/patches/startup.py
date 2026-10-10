@@ -55,7 +55,7 @@ def execute_game(game_cmd, arguments=None, start_method=None):
         if start_method == process.WINDOWS_START_METHOD_OS_STARTFILE:
             process.os.startfile(game_path, 'open', args or '', directory, 5)
         else:
-            process.subprocess.Popen([game_path, *windows_args(args)], cwd=directory, shell=False,
+            process.subprocess.Popen([game_path, *windows_args(args or '')], cwd=directory, shell=False,
                                      stdout=process.subprocess.DEVNULL, stderr=process.subprocess.DEVNULL,
                                      creationflags=getattr(process.subprocess, 'CREATE_NEW_PROCESS_GROUP', 0))
         return True

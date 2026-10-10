@@ -145,6 +145,19 @@ def translated_strings(entry):
     return [entry.msgstr]
 
 
+# 有意保留源语言回退的空 msgstr 标记：在条目注释（tcomment/comment）中包含
+# `i18n-fallback`。未带标记的空译文一律判为失败，带标记的视为合法回退。
+FALLBACK_MARKER = "i18n-fallback"
+
+
+def is_intentional_fallback(entry):
+    if FALLBACK_MARKER not in (entry.comment or ""):
+        return False
+    if FALLBACK_MARKER not in (entry.tcomment or ""):
+        return False
+    return True
+
+
 def compile_i18n(i18n_dir):
     paths = list(iter_po_paths(i18n_dir))
     if not paths:
@@ -181,6 +194,8 @@ def check_i18n(i18n_dir):
         for entry in entries:
             translations = translated_strings(entry)
             if not translations or any(not translation for translation in translations):
+                if is_intentional_fallback(entry):
+                    continue
                 failed = True
                 print(f"empty translation in {po_path}: {entry.msgid!r}")
                 continue

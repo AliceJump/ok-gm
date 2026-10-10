@@ -44,6 +44,8 @@ $env:CR_LOGIN = 'coderabbitai[bot]'
 $env:CR_BOT = 'Bot'
 $env:CR_CONTEXT = 'CodeRabbit'
 $env:CR_BLOCKING = 'CHANGES_REQUESTED'
+$env:CR_COMMENTED = 'COMMENTED'
+$env:CR_PENDING = 'PENDING'
 . (Join-Path $PSScriptRoot "wait-coderabbit-helpers.ps1")
 
 function Invoke-GhChecked {
@@ -114,16 +116,21 @@ function Get-ForcePushEvent {
 }
 
 function Get-ChangesRequestedReviews {
+    # GitHub 只按 CodeRabbit 最新一条非 COMMENTED/PENDING 的评审决定是否阻塞合并。
+    # 先取最新有效评审，仅当其为 CHANGES_REQUESTED 时返回，否则返回空集合。
     $out = Invoke-GhChecked @("api", "--paginate", "repos/$Repo/pulls/$PrNumber/reviews", "--jq",
-        '.[] | select(.user.login == $ENV.CR_LOGIN and .user.type == $ENV.CR_BOT and .state == $ENV.CR_BLOCKING) | [.id, .state, .commit_id, .submitted_at] | @tsv')
+        '.[] | select(.user.login == $ENV.CR_LOGIN and .user.type == $ENV.CR_BOT and .state != $ENV.CR_COMMENTED and .state != $ENV.CR_PENDING) | [.id, .state, .commit_id, .submitted_at] | @tsv')
     if (-not $out) { return @() }
-    $items = @()
+    $latest = $null
     foreach ($ln in ($out -split "`n")) {
         $f = $ln.Trim() -split "`t"
-        if ($f.Count -lt 4) { continue }
-        $items += [pscustomobject]@{ id = $f[0]; state = $f[1]; commit_id = $f[2]; submitted_at = $f[3] }
+        if ($f.Count -lt 4 -or -not $f[3]) { continue }
+        if ($null -eq $latest -or [datetime]$f[3] -gt [datetime]$latest.submitted_at) {
+            $latest = [pscustomobject]@{ id = $f[0]; state = $f[1]; commit_id = $f[2]; submitted_at = $f[3] }
+        }
     }
-    return $items
+    if ($latest -and $latest.state -eq $env:CR_BLOCKING) { return @($latest) }
+    return @()
 }
 
 function Get-NewTopLevelComments {
