@@ -11,5 +11,5 @@
 | `ok-script-codegen` | 根据描述或截图生成任务 `run()` 自动化代码 | `.agents/skills/ok-script-codegen/SKILL.md` |
 | `ok-script-i18n` | gettext UI 文案、PO/MO、收集池防污染与目录冲突合并 | `.agents/skills/ok-script-i18n/SKILL.md` |
 | `ok-config-migration` | 修改持久化任务配置的键名、值格式或所属任务，并迁移账号覆盖数据 | `.agents/skills/ok-config-migration/SKILL.md` |
-| `ok-script-pr-review` | 触发、等待、核验、回复和解析 CodeRabbit PR 审阅 | `.agents/skills/ok-script-pr-review/SKILL.md` |
+| `ok-script-pr-review` | 核实与处置 CodeRabbit PR 审阅、等待本轮审阅、处理限流、线程状态核对（不自行解析线程） | `.agents/skills/ok-script-pr-review/SKILL.md` |
 | `pr-scope-responsibility` | 规划或审阅 PR 职责边界、判断是否需要拆分、核对标题/描述与实际 diff 范围一致性 | `.agents/skills/pr-scope-responsibility/SKILL.md` |
