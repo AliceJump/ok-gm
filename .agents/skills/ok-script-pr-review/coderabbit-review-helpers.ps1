@@ -406,13 +406,14 @@ function Get-CrTopLevelDetailsBlocks {
     # Returns the [start, end) ranges of top-level <details> blocks in the body.
     # Section boundaries must follow these blocks, not arbitrary <summary> tags:
     # both file groups and findings also carry <summary>, so only the outermost
-    # <details> pairs delimit a real section.
+    # <details> pairs delimit a real section. Opening tags may carry attributes
+    # (e.g. <details open>), so match the tag name with an optional attribute list.
     param([string]$Body)
     $blocks = @()
     $depth = 0
     $start = -1
-    foreach ($m in [regex]::Matches($Body, '<details>|</details>')) {
-        if ($m.Value -eq '<details>') {
+    foreach ($m in [regex]::Matches($Body, '<details(?:\s[^>]*)?>|</details\s*>', 'IgnoreCase')) {
+        if ($m.Value -match '^<details') {
             if ($depth -eq 0) { $start = $m.Index }
             $depth++
         } elseif ($depth -gt 0) {
@@ -436,9 +437,10 @@ function Get-CodeRabbitEmbeddedFindings {
         $section = $body.Substring($block.Start, $block.End - $block.Start)
 
         # The section's own heading is the block's opening <summary>, which sits
-        # right after <details> (allow leading whitespace/comments). Match only
-        # that one so a nested finding summary cannot be taken as the heading.
-        $firstSummary = [regex]::Match($section, '(?s)^\s*(?:<!--.*?-->\s*)*<details>\s*<summary>(.*?)</summary>')
+        # right after <details> (allow leading whitespace/comments and attributes
+        # on the tag). Match only that one so a nested finding summary cannot be
+        # taken as the heading.
+        $firstSummary = [regex]::Match($section, '(?s)^\s*(?:<!--.*?-->\s*)*<details(?:\s[^>]*)?>\s*<summary>(.*?)</summary>', 'IgnoreCase')
         if (-not $firstSummary.Success) { continue }
         # Strip inline HTML before matching so a heading containing <code>/<a>
         # (or an emoji-wrapped label) still matches a known section pattern.

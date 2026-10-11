@@ -50,11 +50,18 @@ Assert-Equal 1 @($findingsD | Where-Object { $_.kind -eq 'outsideDiff' }).Count 
 Assert-Equal 'ddddddddddddddddddddddd1' ($findingsD[0].crCommentId) 'D marker belongs to the section'
 
 # Case E: a heading with inline HTML still matches its section.
-$caseE = [regex]::Match($fixture, '(?s)## Case E.*').Value
+$caseE = [regex]::Match($fixture, '(?s)## Case E.*?(?=\n## Case F)').Value
 $findingsE = @(Get-CodeRabbitEmbeddedFindings ([pscustomobject]@{ id = 5; commit_id = 'e'; body = $caseE }))
 Assert-Equal 1 $findingsE.Count 'E finding parsed'
 Assert-Equal 'nitpick' $findingsE[0].kind 'E kind'
 Assert-Equal 'src/lib/helper.ps1:20' $findingsE[0].location 'E location'
+
+# Case F: a section block whose <details> tags carry attributes still parses.
+$caseF = [regex]::Match($fixture, '(?s)## Case F.*').Value
+$findingsF = @(Get-CodeRabbitEmbeddedFindings ([pscustomobject]@{ id = 6; commit_id = 'f'; body = $caseF }))
+Assert-Equal 1 $findingsF.Count 'F finding parsed'
+Assert-Equal 'outsideDiff' $findingsF[0].kind 'F kind'
+Assert-Equal 'src/app/main.py:105' $findingsF[0].location 'F location'
 
 Write-Host ""
 if ($failed -gt 0) { Write-Host "$failed/$checks assertions failed"; exit 1 }

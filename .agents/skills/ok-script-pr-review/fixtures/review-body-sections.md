@@ -132,3 +132,25 @@ Use a singular noun for this function name.
 </details>
 
 </details>
+
+## Case F - Section block opens with an attributed details tag
+
+<details open>
+<summary>⚠️ Outside diff range comments (1)</summary>
+
+<details open>
+<summary>src/app/main.py</summary>
+
+<details>
+<summary>🟠 Major | <code>src/app/main.py:105</code></summary>
+
+Guard against a missing profile key before use.
+
+</details>
+
+<!-- cr-comment:v1:fffffffffffffffffffffff1 -->
+
+</details>
+
+</details>
+
