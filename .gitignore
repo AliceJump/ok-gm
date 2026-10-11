@@ -64,3 +64,6 @@ pip-log.txt
 pip-delete-this-directory.txt
 autohelper
 working_images/
+
+# WorkBuddy 本地数据
+.workbuddy-ai/
