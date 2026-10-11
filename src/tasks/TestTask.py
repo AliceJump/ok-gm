@@ -25,6 +25,5 @@ class TestTask(DailyCoinRandom, ShopMixin):
             }
         }
     def run(self):
-       self.switch_order(target_order=self.config["测试目标排序"])
-
+       self.switch_order(target_order=self.config.get("测试目标排序", "up"))
 

@@ -242,3 +242,257 @@ msgstr ""
 
 msgid "Select only available drop-down option values."
 msgstr ""
+
+msgid "游戏启动器"
+msgstr "Game Launcher"
+
+msgid "保存登录态，使用指定代理检查更新并启动学园偶像大师。"
+msgstr ""
+"Save your session and use the selected proxy to update and launch Gakumas."
+
+msgid "本地代理入口"
+msgstr "Local proxy URL"
+
+msgid "保存代理"
+msgstr "Save proxy"
+
+msgid "在 v2rayN 选择日本节点；此入口用于登录、更新与下载。"
+msgstr ""
+"Select a Japan node in v2rayN. Login, update checks and downloads use this "
+"proxy."
+
+msgid "启动前自动检查并更新游戏"
+msgstr "Automatically update before launch"
+
+msgid "框架启动游戏时使用此启动器"
+msgstr "Use this launcher when the framework starts the game"
+
+msgid "浏览器登录"
+msgstr "Browser login"
+
+msgid "复用 DMM 登录态"
+msgstr "Import DMM session"
+
+msgid "检查登录状态"
+msgstr "Check session"
+
+msgid "检查更新"
+msgstr "Check for updates"
+
+msgid "更新游戏"
+msgstr "Update game"
+
+msgid "启动游戏"
+msgstr "Launch game"
+
+msgid "已有加密登录态，可检查状态或直接启动。"
+msgstr "An encrypted session is saved. Check its status or launch the game."
+
+msgid "首次使用请登录，或复用 DMM Player 的登录态。"
+msgstr "Sign in or import your DMM Player session to get started."
+
+msgid "取消当前操作"
+msgstr "Cancel operation"
+
+msgid "浏览器登录可使用已保存密码。成功后按 Ctrl+L、Ctrl+C 复制成功页地址；登录期间临时启用代理，结束后恢复。"
+msgstr ""
+"Use saved passwords in your browser. After login, press Ctrl+L, Ctrl+C to "
+"copy the success page URL. The temporary proxy is restored when login ends."
+
+msgid "代理设置已保存"
+msgstr "Proxy settings saved"
+
+msgid "正在处理，请稍候…"
+msgstr "Working, please wait…"
+
+msgid "正在取消并恢复设置…"
+msgstr "Cancelling and restoring settings…"
+
+msgid "DMM 启动助手"
+msgstr "DMM Launcher"
+
+msgid "使用本地助手"
+msgstr "Use local launcher"
+
+msgid "自动更新游戏"
+msgstr "Automatically update game"
+
+msgid "通过本地代理获取有效登录凭证、校验更新并启动游戏"
+msgstr "Use a local proxy to authenticate, verify updates and launch the game"
+
+msgid "自动使用保存的登录态检查更新并启动游戏；登录与下载操作在「游戏启动器」页面进行。"
+msgstr ""
+"Use your saved session to update and launch the game. Manage login and "
+"downloads on the Game Launcher page."
+
+msgid "本地 HTTP 代理地址；需在 v2rayN 选择日本节点并确认 DMM 域名分流。"
+msgstr ""
+"Local HTTP proxy URL. Select a Japan node in v2rayN and check routing for "
+"DMM domains."
+
+msgid "下载并校验官方游戏文件后替换；下载中断后可续传。"
+msgstr ""
+"Download and verify official game files before replacing them. Interrupted "
+"downloads can resume."
+
+msgid "使用独立 Xray 节点"
+msgstr "Use a dedicated Xray node"
+
+msgid "使用加密保存的节点配置运行独立 Xray，不随 v2rayN 的节点切换而改变。"
+msgstr ""
+"Run a separate Xray core using your encrypted node configuration, "
+"independent of node selection in v2rayN."
+
+msgid "粘贴节点分享链接，内容会隐藏"
+msgstr "Paste a node link (hidden)"
+
+msgid "保存节点"
+msgstr "Save node"
+
+msgid "导入 JSON 文件"
+msgstr "Import JSON file"
+
+msgid "安装独立 Xray"
+msgstr "Install Xray core"
+
+msgid "账号登录文件"
+msgstr "Account sessions"
+
+msgid "账号编号，例如 1"
+msgstr "Account ID, e.g. 1"
+
+msgid "账号名称"
+msgstr "Account name"
+
+msgid "保存当前登录态"
+msgstr "Save current session"
+
+msgid "切换所选账号"
+msgstr "Switch to selected account"
+
+msgid "新账号登录并保存"
+msgstr "Sign in and save a new account"
+
+msgid "记录当前 DMM 为新账号"
+msgstr "Save current DMM account as new"
+
+msgid "新账号使用新编号保存。切换前先关闭游戏；不会覆盖 DMM Player 的账号文件。"
+msgstr ""
+"Use a new ID for each new account. Close the game before switching. DMM "
+"Player account files are kept intact."
+
+msgid "选择已保存账号"
+msgstr "Select a saved account"
+
+msgid "当前账号"
+msgstr "Current account"
+
+msgid "当前登录态尚未归档"
+msgstr "The current session has not been saved to an account slot"
+
+msgid "已保存节点"
+msgstr "Saved node"
+
+msgid "尚未导入固定节点；导入成功后自动启用独立 Xray。"
+msgstr ""
+"No dedicated node saved. Importing a node enables the separate Xray core."
+
+msgid "导入节点配置"
+msgstr "Import node configuration"
+
+msgid "节点文件无法读取或超过 1 MiB"
+msgstr "Cannot read the node file, or it exceeds 1 MiB"
+
+msgid "外部代理模式在 v2rayN 选择日本节点；独立 Xray 使用下方保存的节点。"
+msgstr ""
+"External proxy: select a Japan node in v2rayN. Dedicated Xray: use the saved"
+" node below."
+
+msgid "下次优先使用"
+msgstr "Use first next time"
+
+msgid "启用或停用节点"
+msgstr "Enable or disable node"
+
+msgid "移除节点"
+msgstr "Remove node"
+
+msgid "节点按顺序轮换；连接失败自动尝试下一个，下载会保留断点。"
+msgstr ""
+"Nodes rotate in order. Connection failures try the next node; downloads keep"
+" their resume data."
+
+msgid "已启用"
+msgstr "Enabled"
+
+msgid "已停用"
+msgstr "Disabled"
+
+msgid "下次开始节点："
+msgstr "Starting node next time: "
+
+msgid "没有启用节点"
+msgstr "No enabled nodes"
+
+msgid "账号配置"
+msgstr "Account settings"
+
+msgid "选择启动器中保存的账号，再设置该账号的任务参数。改名或重新保存登录文件会保留这些配置。"
+msgstr ""
+"Select a saved launcher account, then set its task options. Renaming it or "
+"resaving its session keeps these settings."
+
+msgid "保存账号任务配置"
+msgstr "Save account task settings"
+
+msgid "恢复使用任务默认配置"
+msgstr "Use base task settings"
+
+msgid "刷新账号列表"
+msgstr "Refresh accounts"
+
+msgid "账号配置只在任务运行时应用；任务运行期间不能编辑。"
+msgstr ""
+"Account settings apply only while tasks run. Editing is locked during a "
+"task."
+
+msgid "保存后仅覆盖所选账号的任务参数"
+msgstr "Saving updates task options for the selected account only"
+
+msgid "当前账号的任务配置已保存"
+msgstr "Task settings saved for this account"
+
+msgid "当前账号将使用任务默认配置"
+msgstr "This account will use the base task settings"
+
+msgid "任务运行中，不能修改或切换登录账号"
+msgstr "A task is running. Login accounts cannot be edited or switched."
+
+msgid "多账户模式"
+msgstr "Multiple account mode"
+
+msgid "多账户独立配置"
+msgstr "Separate settings for each account"
+
+msgid "账号列表"
+msgstr "Account list"
+
+msgid "按保存的 DMM 账号逐个执行任务，切换时会关闭并重新启动游戏。"
+msgstr ""
+"Run tasks for saved DMM accounts in order. Switching closes and restarts the"
+" game."
+
+msgid "运行时使用「账号配置」页面保存的当前账号任务参数。"
+msgstr ""
+"Use the current account task settings saved on the Account settings page."
+
+msgid "每行填写一个已保存的 DMM 账号编号；留空时按启动器中的账号顺序执行。"
+msgstr ""
+"Enter one saved DMM account ID per line. Leave empty to run all saved "
+"accounts in launcher order."
+
+msgid "请先在游戏启动器保存账号"
+msgstr "Save an account in the Game Launcher first"
+
+msgid "没有支持账号配置的任务"
+msgstr "No tasks support account settings"
