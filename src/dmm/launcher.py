@@ -99,6 +99,8 @@ def _adopt(original, candidate):
 def browser_login(helper, progress=lambda message: None, browser='system'):
     original = helper.session
     if not original.profile_key:
+        # 默认会话不绑定存档：换号后由下一次启动重新确认身份，清除上一个账号的 identity。
+        original.identity = None
         _browser_login(helper, progress, browser)
         return
     if not original.identity:
@@ -116,6 +118,8 @@ def browser_login(helper, progress=lambda message: None, browser='system'):
 def import_login(helper):
     original = helper.session
     if not original.profile_key:
+        # 默认会话不绑定存档：导入的账号由下一次启动重新确认身份，清除上一个账号的 identity。
+        original.identity = None
         return original.import_player()
     if not original.identity:
         original.verify_game_identity()

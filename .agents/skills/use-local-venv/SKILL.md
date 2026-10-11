@@ -52,7 +52,7 @@ uv run --locked python -m unittest discover -s tests
 
 ## Tests
 
-- Full repository suite: `scripts/testing/run_tests.ps1` (which uses `uv run --locked`).
+- Full repository suite: `./run_tests.ps1` (PowerShell).
 - Focused unittest: `uv run --locked python -m unittest tests.TestModule -v`.
 - Do not use a direct `.venv` interpreter invocation as formal verification; all formal checks use a locked `uv` entry point.
 - Preserve and report pre-existing independent failures; do not hide them by switching interpreters or dependencies.

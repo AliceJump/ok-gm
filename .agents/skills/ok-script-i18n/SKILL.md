@@ -21,7 +21,7 @@ description: Maintain gettext translations for ok-script task UI and runtime mes
    uv run --locked python -m unittest tests.TestPoLocaleConsistency -v
    ```
 
-Translate concise UI text, preserving placeholders, code-significant punctuation, and hotkey names such as `F8` or `Ctrl`. An empty `msgstr` is appropriate only for an intentional source-language fallback. Do not add log-only strings unless requested.
+Translate concise UI text, preserving placeholders, code-significant punctuation, and hotkey names such as `F8` or `Ctrl`. An empty `msgstr` is appropriate only for an intentional source-language fallback; mark each such entry with an `i18n-fallback` token in both its comment and translator comment (e.g. `#. i18n-fallback` / `# i18n-fallback`), otherwise `check` reports it as a failure. Do not add log-only strings unless requested.
 
 ## Keep translation inputs stable
 

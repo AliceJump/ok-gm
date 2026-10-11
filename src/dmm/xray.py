@@ -234,8 +234,7 @@ class NodeStore:
         if self.exe.is_file():
             return self.exe
         bundled = Path(__file__).resolve().parents[2] / 'vendor/xray/xray.exe'
-        local = Path('D:/Programs/v2rayn/bin/xray/xray.exe')
-        for source in (bundled, local):
+        for source in (bundled,):
             if source.is_file():
                 data = source.read_bytes()
                 if not data.startswith(b'MZ'):
