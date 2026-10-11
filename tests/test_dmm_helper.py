@@ -47,7 +47,7 @@ class DmmTests(unittest.TestCase):
                      "folder/../../escape", "NUL", "trailing. ", ".ok-gm-update/file", "file?", "file\0"):
             with self.subTest(name=name), self.assertRaises(DmmError):
                 safe_path(self.root, name)
-        self.assertEqual(safe_path(self.root, "/folder/game.bin"), self.root / "folder" / "game.bin")
+        self.assertEqual(safe_path(self.root, "/folder/game.bin"), (self.root / "folder" / "game.bin").resolve())
 
     def test_windows_arguments_preserve_quotes_without_shell(self):
         arguments = ['/viewer_id=example', '/open_id=two words', '/pf_access_token=a&b;$(x)']
@@ -176,7 +176,7 @@ class DmmTests(unittest.TestCase):
         real_replace = os.replace
 
         def replace(source, target):
-            if Path(source) == updater.staging / "game.bin":
+            if Path(source).resolve() == (updater.staging / "game.bin").resolve():
                 raise OSError("simulated locked file")
             return real_replace(source, target)
 
