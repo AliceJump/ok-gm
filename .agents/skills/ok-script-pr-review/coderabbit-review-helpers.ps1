@@ -402,30 +402,52 @@ $script:CrEmbeddedSections = @(
     @{ Pattern = 'Nitpick comments'; Kind = 'nitpick' }
 )
 
+function Get-CrTopLevelDetailsBlocks {
+    # Returns the [start, end) ranges of top-level <details> blocks in the body.
+    # Section boundaries must follow these blocks, not arbitrary <summary> tags:
+    # both file groups and findings also carry <summary>, so only the outermost
+    # <details> pairs delimit a real section.
+    param([string]$Body)
+    $blocks = @()
+    $depth = 0
+    $start = -1
+    foreach ($m in [regex]::Matches($Body, '<details>|</details>')) {
+        if ($m.Value -eq '<details>') {
+            if ($depth -eq 0) { $start = $m.Index }
+            $depth++
+        } elseif ($depth -gt 0) {
+            $depth--
+            if ($depth -eq 0) { $blocks += [pscustomobject]@{ Start = $start; End = $m.Index + $m.Length } }
+        }
+    }
+    return $blocks
+}
+
 function Get-CodeRabbitEmbeddedFindings {
     # Parses the review body section by section so a heading only claims the
     # findings that belong to it: outside-diff findings must not absorb a later
-    # nitpick section, and every finding carries its own kind.
+    # nitpick section (or any other block), and every finding carries its kind.
     param([object]$Review)
     $body = [string]$Review.body
     $findings = @()
     if (-not $body) { return $findings }
 
-    # Locate every section heading (the <summary> that opens a findings group).
-    $headings = @()
-    foreach ($section in $script:CrEmbeddedSections) {
-        foreach ($m in [regex]::Matches($body, "<summary>[^<]*$([regex]::Escape($section.Pattern))[^<]*</summary>")) {
-            $headings += [pscustomobject]@{ Kind = $section.Kind; Start = $m.Index }
-        }
-    }
-    if ($headings.Count -eq 0) { return $findings }
-    $headings = @($headings | Sort-Object Start)
+    foreach ($block in Get-CrTopLevelDetailsBlocks $body) {
+        $section = $body.Substring($block.Start, $block.End - $block.Start)
 
-    for ($i = 0; $i -lt $headings.Count; $i++) {
-        $start = $headings[$i].Start
-        $end = if ($i + 1 -lt $headings.Count) { $headings[$i + 1].Start } else { $body.Length }
-        $section = $body.Substring($start, $end - $start)
-        $kind = $headings[$i].Kind
+        # The section's own heading is the block's opening <summary>, which sits
+        # right after <details> (allow leading whitespace/comments). Match only
+        # that one so a nested finding summary cannot be taken as the heading.
+        $firstSummary = [regex]::Match($section, '(?s)^\s*(?:<!--.*?-->\s*)*<details>\s*<summary>(.*?)</summary>')
+        if (-not $firstSummary.Success) { continue }
+        # Strip inline HTML before matching so a heading containing <code>/<a>
+        # (or an emoji-wrapped label) still matches a known section pattern.
+        $heading = Get-CrPlainText ($firstSummary.Groups[1].Value -replace '<[^>]+>', ' ')
+        $kind = $null
+        foreach ($known in $script:CrEmbeddedSections) {
+            if ($heading -like "*$($known.Pattern)*") { $kind = $known.Kind; break }
+        }
+        if ($null -eq $kind) { continue }
 
         # Walk each cr-comment marker and take the nearest preceding <summary>.
         # The nearest summary is the finding's own; a file-group summary sits

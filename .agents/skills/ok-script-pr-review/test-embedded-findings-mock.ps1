@@ -37,9 +37,24 @@ Assert-Equal 0 @($findingsB | Where-Object { $_.kind -eq 'outsideDiff' }).Count 
 Assert-Equal 2 @($findingsB | Where-Object { $_.kind -eq 'nitpick' }).Count 'B nitpick count'
 
 # Case C: no embedded findings.
-$caseC = [regex]::Match($fixture, '(?s)## Case C.*').Value
+$caseC = [regex]::Match($fixture, '(?s)## Case C.*?(?=\n## Case D)').Value
 $findingsC = @(Get-CodeRabbitEmbeddedFindings ([pscustomobject]@{ id = 3; commit_id = 'c'; body = $caseC }))
 Assert-Equal 0 $findingsC.Count 'C no findings'
+
+# Case D: a later non-findings block with its own cr-comment marker must not be
+# absorbed into the earlier section.
+$caseD = [regex]::Match($fixture, '(?s)## Case D.*?(?=\n## Case E)').Value
+$findingsD = @(Get-CodeRabbitEmbeddedFindings ([pscustomobject]@{ id = 4; commit_id = 'd'; body = $caseD }))
+Assert-Equal 1 $findingsD.Count 'D only the outsideDiff finding'
+Assert-Equal 1 @($findingsD | Where-Object { $_.kind -eq 'outsideDiff' }).Count 'D outsideDiff count'
+Assert-Equal 'ddddddddddddddddddddddd1' ($findingsD[0].crCommentId) 'D marker belongs to the section'
+
+# Case E: a heading with inline HTML still matches its section.
+$caseE = [regex]::Match($fixture, '(?s)## Case E.*').Value
+$findingsE = @(Get-CodeRabbitEmbeddedFindings ([pscustomobject]@{ id = 5; commit_id = 'e'; body = $caseE }))
+Assert-Equal 1 $findingsE.Count 'E finding parsed'
+Assert-Equal 'nitpick' $findingsE[0].kind 'E kind'
+Assert-Equal 'src/lib/helper.ps1:20' $findingsE[0].location 'E location'
 
 Write-Host ""
 if ($failed -gt 0) { Write-Host "$failed/$checks assertions failed"; exit 1 }

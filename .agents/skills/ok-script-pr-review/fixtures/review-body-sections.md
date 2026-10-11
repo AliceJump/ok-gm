@@ -81,3 +81,54 @@ Prefer named parameters.
 Review completed. Actionable comments posted: 3.
 
 <!-- cr-comment:v1:ccccccccccccccccccccccc1 -->
+
+## Case D - A later non-findings block must not leak into the earlier section
+
+<details>
+<summary>⚠️ Outside diff range comments (1)</summary>
+
+<details>
+<summary>src/app/main.py</summary>
+
+<details>
+<summary>🟠 Major | <code>src/app/main.py:105</code></summary>
+
+Guard against a missing profile key before use.
+
+</details>
+
+<!-- cr-comment:v1:ddddddddddddddddddddddd1 -->
+
+</details>
+
+</details>
+
+<details>
+<summary>📜 Review details</summary>
+
+Some closing notes with their own marker.
+
+<!-- cr-comment:v1:ddddddddddddddddddddddd2 -->
+
+</details>
+
+## Case E - Heading carries inline HTML
+
+<details>
+<summary>🧹 <code>Nitpick</code> comments (1)</summary>
+
+<details>
+<summary>src/lib/helper.ps1</summary>
+
+<details>
+<summary>🟡 Minor | <code>src/lib/helper.ps1:20</code></summary>
+
+Use a singular noun for this function name.
+
+</details>
+
+<!-- cr-comment:v1:eeeeeeeeeeeeeeeeeeeeeee1 -->
+
+</details>
+
+</details>
